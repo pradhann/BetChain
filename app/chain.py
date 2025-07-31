@@ -5,8 +5,12 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from filelock import FileLock
 import orjson
-from .models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, VerifyResponse
-from .crypto import verify_signature, verify_user_ownership, is_user_registered
+try:
+    from .models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, VerifyResponse
+    from .crypto import verify_signature, verify_user_ownership, is_user_registered
+except ImportError:
+    from models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, VerifyResponse
+    from crypto import verify_signature, verify_user_ownership, is_user_registered
 
 
 import os

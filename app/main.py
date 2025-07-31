@@ -3,16 +3,30 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from typing import List, Dict
 import uuid
-from .models import (
-    ActionRequest, ApiResponse, BetState, HeadInfo, VerifyResponse,
-    ActionType, ProposePayload, AcceptPayload, OutcomePayload, 
-    ConfirmPayload, CancelPayload, LoginRequest, AuthResponse
-)
-from .chain import (
-    load_chain, derive_bet_states, validate_action, create_entry, 
-    append_entry, get_head, verify_chain
-)
-from .crypto import get_user_public_key, register_user, is_user_registered
+try:
+    # Try relative imports first (for package structure)
+    from .models import (
+        ActionRequest, ApiResponse, BetState, HeadInfo, VerifyResponse,
+        ActionType, ProposePayload, AcceptPayload, OutcomePayload, 
+        ConfirmPayload, CancelPayload, LoginRequest, AuthResponse
+    )
+    from .chain import (
+        load_chain, derive_bet_states, validate_action, create_entry, 
+        append_entry, get_head, verify_chain
+    )
+    from .crypto import get_user_public_key, register_user, is_user_registered
+except ImportError:
+    # Fallback to absolute imports (for direct execution)
+    from models import (
+        ActionRequest, ApiResponse, BetState, HeadInfo, VerifyResponse,
+        ActionType, ProposePayload, AcceptPayload, OutcomePayload, 
+        ConfirmPayload, CancelPayload, LoginRequest, AuthResponse
+    )
+    from chain import (
+        load_chain, derive_bet_states, validate_action, create_entry, 
+        append_entry, get_head, verify_chain
+    )
+    from crypto import get_user_public_key, register_user, is_user_registered
 
 app = FastAPI(title="BetChain", description="Hash-chained betting between friends")
 
