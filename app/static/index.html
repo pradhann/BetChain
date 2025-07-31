@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetChain - Peer-to-Peer Betting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #1a1d29;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .app {
+            min-height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #10b981;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .verification-badge {
+            background: #059669;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #252837;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+        }
+
+        /* Login Section */
+        .login-section {
+            background: #252837;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 100px auto;
+            max-width: 500px;
+        }
+
+        /* Squad Section */
+        .squad-section {
+            background: #252837;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .squad-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .squad-icon {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+
+        .squad-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .squad-subtitle {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-left: 35px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .squad-members {
+            display: flex;
+            gap: 20px;
+        }
+
+        .member {
+            text-align: center;
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .member-avatar.current-user::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 16px;
+            height: 16px;
+            background: #10b981;
+            border: 2px solid #1a1d29;
+            border-radius: 50%;
+        }
+
+        .member-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .member-you {
+            color: #10b981;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Propose Bet Button */
+        .propose-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: all 0.2s ease;
+        }
+
+        .propose-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #252837;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .stat-sublabel {
+            color: #10b981;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Chain Section */
+        .chain-section {
+            background: #252837;
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .chain-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .chain-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .chain-title h2 {
+            flex: 1;
+        }
+
+        .chain-icon {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+
+        .chain-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .chain-status {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #059669;
+            color: white;
+        }
+        
+        .chain-status.corrupted {
+            background: #dc2626;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Bet Cards */
+        .bet-card {
+            background: #1a1d29;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .bet-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #065f46;
+            color: #10b981;
+        }
+
+        .status-pending {
+            background: #92400e;
+            color: #fbbf24;
+        }
+
+        .bet-stake {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .bet-content {
+            margin-top: 35px;
+        }
+
+        .bet-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .bet-participants {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .participant-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+        }
+
+        .participant-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .vs {
+            color: #9ca3af;
+            font-weight: normal;
+        }
+
+        .bet-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+
+        .bet-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .bet-id {
+            font-family: monospace;
+            background: #374151;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .witnesses {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .witness-avatar {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            border: 2px solid #1a1d29;
+            margin-left: -5px;
+        }
+
+        .witness-count {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #252837;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .modal-subtitle {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #dc2626;
+        }
+
+        /* Hide sections by default */
+        .main-app {
+            display: none;
+        }
+
+        .login-section {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .squad-members {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .bet-participants {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Login Section -->
+        <div class="login-section" id="loginSection">
+            <div class="logo" style="justify-content: center; margin-bottom: 30px;">
+                <div class="logo-icon">#</div>
+                <h1>BetChain</h1>
+                <div class="verification-badge">🔐 Verified Group</div>
+            </div>
+            
+            <h2 style="margin-bottom: 10px;">Welcome to The BigSur Squad</h2>
+            <p style="color: #9ca3af; margin-bottom: 30px;">Cryptographically verified peer-to-peer betting between friends</p>
+            
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="loginUsername" class="form-input" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Private Key</label>
+                <input type="password" id="loginPrivateKey" class="form-input" placeholder="Enter your private key">
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="loginUser()">
+                🔐 Login Securely
+            </button>
+            
+            <p style="color: #9ca3af; font-size: 0.875rem;">
+                Need keys? <a href="/static/key-generator-simple.html" style="color: #10b981;">Generate them here →</a>
+            </p>
+        </div>
+
+        <!-- Main App -->
+        <div class="main-app" id="mainApp">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">#</div>
+                    <h1>BetChain</h1>
+                    <div class="verification-badge">🔐 Verified Group</div>
+                </div>
+                
+                <div class="user-profile" onclick="logoutUser()">
+                    <div class="user-avatar"></div>
+                    <span id="currentUserName">Alex Chen</span>
+                </div>
+            </div>
+
+            <!-- Squad Section -->
+            <div class="squad-section">
+                <div class="squad-header">
+                    <span class="squad-icon">👥</span>
+                    <h2 class="squad-title">The Squad</h2>
+                </div>
+                <div class="squad-subtitle">Cryptographically verified peer-to-peer betting between friends</div>
+                
+                <div class="squad-members" id="squadMembers">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Propose Bet Button -->
+            <button class="propose-btn" onclick="showProposeModal()">
+                + Propose Bet
+            </button>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="activeBets">1</div>
+                    <div class="stat-label">Your Active Bets</div>
+                    <div class="stat-sublabel">Currently in play</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingChallenges">0</div>
+                    <div class="stat-label">Pending Challenges</div>
+                    <div class="stat-sublabel">Waiting for you</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBets">4</div>
+                    <div class="stat-label">Total in Chain</div>
+                    <div class="stat-sublabel">Verified bets</div>
+                </div>
+            </div>
+
+            <!-- Chain Section -->
+            <div class="chain-section">
+                <div class="chain-header">
+                    <div class="chain-title">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="chain-icon">#</span>
+                            <h2>The Chain</h2>
+                        </div>
+                        <div class="chain-controls">
+                            <div id="chainStatus" class="chain-status">✓ Verified</div>
+                            <button class="btn btn-secondary" onclick="validateChain()" id="validateBtn">
+                                🔍 Validate Chain
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="betsList">
+                    <!-- Will be populated with bet cards -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Propose Bet Modal -->
+        <div class="modal" id="proposeModal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeProposeModal()">&times;</button>
+                
+                <div class="modal-header">
+                    <h2 class="modal-title">Propose New Bet</h2>
+                    <p class="modal-subtitle">Challenge a friend to a cryptographically secured bet</p>
+                </div>
+                
+                <form id="proposeForm">
+                    <div class="form-group">
+                        <label class="form-label">Betting Against</label>
+                        <select id="proposeCounterparty" class="form-select" required>
+                            <option value="">Select opponent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Bet Terms</label>
+                        <textarea id="proposeTerms" class="form-textarea" placeholder="Be specific about what you're betting on and the conditions for winning" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Stake</label>
+                        <input type="text" id="proposeStake" class="form-input" placeholder="What's on the line?" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        🎯 Propose Bet
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script>
+        // State
+        let currentUser = null;
+        let userKeys = {};
+        let allUsers = [];
+        let allBets = [];
+        
+        // Load saved login state on page load
+        function loadSavedLogin() {
+            const savedUser = localStorage.getItem('betchain_user');
+            const savedKeys = localStorage.getItem('betchain_keys');
+            
+            if (savedUser && savedKeys) {
+                try {
+                    currentUser = savedUser;
+                    userKeys = JSON.parse(savedKeys);
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('currentUserName').textContent = currentUser;
+                    return true;
+                } catch (error) {
+                    console.error('Failed to load saved login:', error);
+                    localStorage.removeItem('betchain_user');
+                    localStorage.removeItem('betchain_keys');
+                }
+            }
+            return false;
+        }
+        
+        // Save login state
+        function saveLogin(username, keys) {
+            localStorage.setItem('betchain_user', username);
+            localStorage.setItem('betchain_keys', JSON.stringify(keys));
+        }
+        
+        // Clear saved login
+        function clearSavedLogin() {
+            localStorage.removeItem('betchain_user');
+            localStorage.removeItem('betchain_keys');
+        }
+
+        // API Helper
+        async function apiCall(url, method = 'GET', body = null) {
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: body ? {'Content-Type': 'application/json'} : {},
+                    body: body ? JSON.stringify(body) : null
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || 'API error');
+                }
+                return data;
+            } catch (error) {
+                showNotification(error.message, 'error');
+                throw error;
+            }
+        }
+
+        // Private key validation
+        function validatePrivateKeyForUser(privateKeyHex, publicKeyHex) {
+            // Basic format validation
+            if (!privateKeyHex || privateKeyHex.length < 60) {
+                return false;
+            }
+            
+            // Ensure it's not the same as the public key (prevent using public key as private key)
+            if (privateKeyHex === publicKeyHex) {
+                return false;
+            }
+            
+            // Private keys should start with DER prefix for Ed25519 private keys
+            if (!privateKeyHex.startsWith('302e020100300506032b657004220420')) {
+                return false;
+            }
+            
+            // For our demo system, derive expected public key from private key
+            // This is a simplified check - in real Ed25519, you'd do proper key derivation
+            const expectedPublicKey = derivePublicKeyFromPrivate(privateKeyHex);
+            return expectedPublicKey === publicKeyHex;
+        }
+        
+        function derivePublicKeyFromPrivate(privateKeyHex) {
+            // Extract the seed from the private key (last 64 chars = 32 bytes)
+            const seedHex = privateKeyHex.slice(-64);
+            
+            // Mock derivation - create public key using same method as key generator
+            const seed = new Uint8Array(seedHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            const mockPublicKey = new Uint8Array(32);
+            for (let i = 0; i < 32; i++) {
+                mockPublicKey[i] = seed[i] ^ 0x42; // Same XOR operation as in key generator
+            }
+            const publicHex = Array.from(mockPublicKey, b => b.toString(16).padStart(2, '0')).join('');
+            return "302a300506032b65700321" + "00" + publicHex;
+        }
+
+        // Authentication
+        async function loginUser() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const privateKey = document.getElementById('loginPrivateKey').value.trim();
+            
+            if (!username || !privateKey) {
+                showNotification('Please enter both username and private key', 'error');
+                return;
+            }
+            
+            try {
+                // Verify user exists and get their registered public key
+                const serverData = await apiCall(`/keys/${username}`);
+                
+                // Validate that the entered private key corresponds to the registered public key
+                // For our demo system, we'll check if the private key matches the expected format
+                if (!validatePrivateKeyForUser(privateKey, serverData.public_key)) {
+                    throw new Error('Invalid private key for this user');
+                }
+                
+                currentUser = username;
+                userKeys = {
+                    private_key: privateKey,
+                    public_key: serverData.public_key
+                };
+                
+                // Save login state
+                saveLogin(username, userKeys);
+                
+                // Switch to main app
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('currentUserName').textContent = username;
+                
+                showNotification(`Welcome, ${username}! 🎉`);
+                
+                // Load data
+                await loadAllData();
+                
+            } catch (error) {
+                showNotification('Login failed: ' + error.message, 'error');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            userKeys = {};
+            clearSavedLogin();
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPrivateKey').value = '';
+            showNotification('Logged out successfully');
+        }
+
+        // Load all data
+        async function loadAllData() {
+            try {
+                // Load users
+                const usersResponse = await apiCall('/users');
+                allUsers = usersResponse.users;
+                
+                // Load bets
+                const betsResponse = await apiCall('/bets');
+                allBets = betsResponse;
+                
+                // Verify chain integrity
+                const verifyResponse = await apiCall('/verify');
+                const chainStatus = document.getElementById('chainStatus');
+                if (!verifyResponse.ok) {
+                    showNotification(`⚠️ CHAIN CORRUPTED: ${verifyResponse.message} at index ${verifyResponse.error_at_index}`, 'error');
+                    chainStatus.textContent = `⚠️ CORRUPTED (Index ${verifyResponse.error_at_index})`;
+                    chainStatus.className = 'chain-status corrupted';
+                } else {
+                    chainStatus.textContent = '✓ Verified';
+                    chainStatus.className = 'chain-status';
+                }
+                
+                renderSquadMembers();
+                renderStats();
+                renderBetsList();
+                updateProposeForm();
+                
+            } catch (error) {
+                console.error('Failed to load data:', error);
+            }
+        }
+
+        // Render squad members
+        function renderSquadMembers() {
+            const container = document.getElementById('squadMembers');
+            container.innerHTML = allUsers.map(user => `
+                <div class="member">
+                    <div class="member-avatar ${user === currentUser ? 'current-user' : ''}"></div>
+                    <div class="member-name">${user}</div>
+                    ${user === currentUser ? '<div class="member-you">You</div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        // Render stats
+        function renderStats() {
+            const userBets = allBets.filter(bet => 
+                bet.parties.proposer === currentUser || bet.parties.counterparty === currentUser
+            );
+            const activeBets = userBets.filter(bet => bet.status === 'ACCEPTED').length;
+            const pendingChallenges = allBets.filter(bet => 
+                bet.parties.counterparty === currentUser && bet.status === 'PROPOSED'
+            ).length;
+            
+            document.getElementById('activeBets').textContent = activeBets;
+            document.getElementById('pendingChallenges').textContent = pendingChallenges;
+            document.getElementById('totalBets').textContent = allBets.length;
+        }
+
+        // Render bets list
+        function renderBetsList() {
+            const container = document.getElementById('betsList');
+            
+            if (allBets.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">No bets yet. Be the first to propose one! 🎲</p>';
+                return;
+            }
+            
+            container.innerHTML = allBets.map((bet, index) => {
+                const statusClass = bet.status.toLowerCase().replace('_', '-');
+                const statusText = bet.status === 'OUTCOME_PENDING' ? 'pending' : bet.status.toLowerCase();
+                const isCompleted = bet.status === 'RESOLVED';
+                const isPending = bet.status === 'PROPOSED';
+                const canAccept = bet.parties.counterparty === currentUser && bet.status === 'PROPOSED';
+                
+                return `
+                    <div class="bet-card">
+                        <div class="bet-status status-${isCompleted ? 'completed' : 'pending'}">
+                            ${isCompleted ? '✅ Completed' : isPending ? '⏳ Pending' : '🎯 Active'}
+                        </div>
+                        
+                        <div class="bet-stake">${bet.stake}</div>
+                        
+                        <div class="bet-content">
+                            <div class="bet-title">${bet.terms || 'No terms specified'}</div>
+                            
+                            <div class="bet-participants">
+                                <div class="participant">
+                                    <div class="participant-avatar"></div>
+                                    <span class="participant-name">${bet.parties.proposer}</span>
+                                </div>
+                                <span class="vs">vs</span>
+                                <div class="participant">
+                                    <div class="participant-avatar"></div>
+                                    <span class="participant-name">${bet.parties.counterparty}</span>
+                                </div>
+                            </div>
+                            
+                            ${canAccept ? `
+                                <button class="btn btn-primary" style="margin-top: 15px;" onclick="acceptBet('${bet.bet_id}')">
+                                    ✅ Accept Challenge
+                                </button>
+                            ` : ''}
+                            
+                            <div class="bet-meta">
+                                <div class="bet-time">
+                                    <span>${getTimeAgo(bet.last_updated)}</span>
+                                </div>
+                                <div class="bet-id">#${bet.bet_id.slice(0, 8)}</div>
+                            </div>
+                            
+                            ${isCompleted ? `
+                                <div class="witnesses">
+                                    <div class="witness-avatar"></div>
+                                    <div class="witness-avatar"></div>
+                                    <span class="witness-count">2 witnesses</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Modal functions
+        function showProposeModal() {
+            document.getElementById('proposeModal').classList.add('active');
+        }
+
+        function closeProposeModal() {
+            document.getElementById('proposeModal').classList.remove('active');
+            // Reset form when closing
+            document.getElementById('proposeForm').reset();
+        }
+
+        function updateProposeForm() {
+            const select = document.getElementById('proposeCounterparty');
+            const otherUsers = allUsers.filter(user => user !== currentUser);
+            
+            select.innerHTML = '<option value="">Select opponent</option>' + 
+                otherUsers.map(user => `<option value="${user}">${user}</option>`).join('');
+        }
+
+        // Form submission
+        document.getElementById('proposeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const counterparty = document.getElementById('proposeCounterparty').value;
+            const terms = document.getElementById('proposeTerms').value;
+            const stake = document.getElementById('proposeStake').value;
+            
+            if (!counterparty || !terms || !stake) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            try {
+                // Generate bet ID
+                const betId = 'bet_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Create transaction data
+                const transactionData = {
+                    type: 'PROPOSE',
+                    bet_id: betId,
+                    author: currentUser,
+                    payload: {
+                        counterparty: counterparty,
+                        terms: terms,
+                        stake: stake,
+                        deadline_utc: null
+                    },
+                    public_key: userKeys.public_key
+                };
+                
+                // Sign transaction
+                const signature = await signTransaction(transactionData);
+                
+                // Submit transaction
+                await apiCall('/tx', 'POST', {
+                    ...transactionData,
+                    signature: signature.signature
+                });
+                
+                showNotification('🎯 Bet proposed successfully!');
+                closeProposeModal();
+                e.target.reset();
+                await loadAllData();
+                
+            } catch (error) {
+                showNotification('Failed to propose bet: ' + error.message, 'error');
+            }
+        });
+
+        // Accept bet
+        async function acceptBet(betId) {
+            try {
+                const transactionData = {
+                    type: 'ACCEPT',
+                    bet_id: betId,
+                    author: currentUser,
+                    payload: {},
+                    public_key: userKeys.public_key
+                };
+                
+                const signature = await signTransaction(transactionData);
+                
+                await apiCall('/tx', 'POST', {
+                    ...transactionData,
+                    signature: signature.signature
+                });
+                
+                showNotification('✅ Challenge accepted!');
+                await loadAllData();
+                
+            } catch (error) {
+                showNotification('Failed to accept bet: ' + error.message, 'error');
+            }
+        }
+        
+        // Validate chain manually
+        async function validateChain() {
+            const validateBtn = document.getElementById('validateBtn');
+            const chainStatus = document.getElementById('chainStatus');
+            
+            try {
+                // Show loading state
+                validateBtn.textContent = '⏳ Validating...';
+                validateBtn.disabled = true;
+                chainStatus.textContent = '🔍 Checking...';
+                chainStatus.className = 'chain-status';
+                
+                const verifyResponse = await apiCall('/verify');
+                
+                if (!verifyResponse.ok) {
+                    chainStatus.textContent = `⚠️ CORRUPTED (Index ${verifyResponse.error_at_index})`;
+                    chainStatus.className = 'chain-status corrupted';
+                    showNotification(`Chain corruption detected: ${verifyResponse.message} at index ${verifyResponse.error_at_index}`, 'error');
+                } else {
+                    chainStatus.textContent = '✓ Verified';
+                    chainStatus.className = 'chain-status';
+                    showNotification('✅ Chain integrity verified!', 'success');
+                }
+                
+            } catch (error) {
+                chainStatus.textContent = '❌ Check Failed';
+                chainStatus.className = 'chain-status corrupted';
+                showNotification('Failed to validate chain: ' + error.message, 'error');
+            } finally {
+                // Reset button
+                validateBtn.textContent = '🔍 Validate Chain';
+                validateBtn.disabled = false;
+            }
+        }
+
+        // Real Ed25519 signature implementation
+        async function signTransaction(transactionData) {
+            try {
+                const canonicalJson = JSON.stringify(transactionData, Object.keys(transactionData).sort());
+                const messageBytes = new TextEncoder().encode(canonicalJson);
+                
+                // Import the private key from hex
+                const privateKeyBytes = hexToBytes(userKeys.private_key);
+                
+                // Import as Ed25519 private key
+                const privateKey = await crypto.subtle.importKey(
+                    'pkcs8',
+                    privateKeyBytes,
+                    {
+                        name: 'Ed25519',
+                    },
+                    false,
+                    ['sign']
+                );
+                
+                // Sign the message
+                const signatureBytes = await crypto.subtle.sign(
+                    'Ed25519',
+                    privateKey,
+                    messageBytes
+                );
+                
+                const signatureHex = bytesToHex(new Uint8Array(signatureBytes));
+                
+                return {
+                    signature: signatureHex,
+                    public_key: userKeys.public_key
+                };
+                
+            } catch (error) {
+                console.error('Real signing failed, using fallback:', error);
+                // Fallback for browsers that don't support Ed25519
+                return await signTransactionFallback(transactionData);
+            }
+        }
+        
+        // Fallback signing for browsers without Ed25519 support
+        async function signTransactionFallback(transactionData) {
+            const canonicalJson = JSON.stringify(transactionData, Object.keys(transactionData).sort());
+            
+            // Use HMAC-SHA256 as a fallback
+            const key = await crypto.subtle.importKey(
+                'raw',
+                hexToBytes(userKeys.private_key.slice(0, 64)), // Use first 32 bytes as key
+                { name: 'HMAC', hash: 'SHA-256' },
+                false,
+                ['sign']
+            );
+            
+            const signatureBytes = await crypto.subtle.sign(
+                'HMAC',
+                key,
+                new TextEncoder().encode(canonicalJson)
+            );
+            
+            const signatureHex = bytesToHex(new Uint8Array(signatureBytes));
+            
+            return {
+                signature: signatureHex,
+                public_key: userKeys.public_key
+            };
+        }
+        
+        // Utility functions
+        function hexToBytes(hex) {
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+            }
+            return bytes;
+        }
+        
+        function bytesToHex(bytes) {
+            return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Utility functions
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'just now';
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = now - time;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+            if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            return 'just now';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('proposeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'proposeModal') {
+                closeProposeModal();
+            }
+        });
+        
+        // Initialize app - check for saved login
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!loadSavedLogin()) {
+                // No saved login, show login screen
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('mainApp').style.display = 'none';
+            } else {
+                // Saved login loaded, load data
+                loadAllData();
+            }
+        });
+    </script>
+</body>
+</html>

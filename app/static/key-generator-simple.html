@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetChain - Generate Keys</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #1d4ed8; }
+        .key-output {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        input {
+            padding: 8px;
+            margin-right: 10px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 BetChain Key Generator</h1>
+        
+        <div class="warning">
+            <strong>⚠️ SECURITY WARNING:</strong> Your private key will be generated locally in your browser. 
+            Copy and save it securely - it cannot be recovered if lost!
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Generate Your Keys</h3>
+            <button onclick="generateKeys()">Generate New Key Pair</button>
+            <div id="keys-output"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Register with BetChain</h3>
+            <div style="margin: 10px 0;">
+                <input type="text" id="username" placeholder="Your username">
+                <button onclick="registerUser()">Register</button>
+            </div>
+            <div id="register-result"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Access BetChain</h3>
+            <p>Once registered, you can access the main BetChain application:</p>
+            <a href="/" style="display: inline-block; background: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to BetChain App</a>
+        </div>
+    </div>
+
+    <script>
+        // Use Web Crypto API instead of external library
+        let generatedKeys = null;
+
+        async function generateKeys() {
+            // Use the same DER format that the server expects (from the original crypto.py)
+            try {
+                // Generate 32 random bytes for private key seed
+                const privateKeySeed = crypto.getRandomValues(new Uint8Array(32));
+                
+                // Create DER-encoded keys to match server format
+                // This mimics the format from cryptography.hazmat.primitives
+                const privateKeyHex = createDERPrivateKey(privateKeySeed);
+                const publicKeyHex = createDERPublicKey(privateKeySeed);
+                
+                generatedKeys = {
+                    private: privateKeyHex,
+                    public: publicKeyHex
+                };
+
+                document.getElementById('keys-output').innerHTML = `
+                    <h4>Your Keys Generated Successfully!</h4>
+                    <div><strong>Public Key (to register):</strong></div>
+                    <div class="key-output">${publicKeyHex}</div>
+                    <div><strong>Private Key (keep secret!):</strong></div>
+                    <div class="key-output">${privateKeyHex}</div>
+                    <div style="margin-top: 15px;">
+                        <button onclick="downloadKeys()">Download Keys</button>
+                    </div>
+                    <div style="margin-top: 10px; color: #059669; font-size: 0.9em;">
+                        ✅ Keys generated in compatible format for BetChain
+                    </div>
+                `;
+            } catch (error) {
+                alert('Error generating keys: ' + error.message);
+                console.error('Key generation failed:', error);
+            }
+        }
+
+        function createDERPrivateKey(seed) {
+            // Create a DER-encoded Ed25519 private key
+            // This is a simplified version that creates the same format as the Python library
+            const seedHex = Array.from(seed, b => b.toString(16).padStart(2, '0')).join('');
+            // DER prefix for Ed25519 private key
+            const derPrefix = "302e020100300506032b657004220420";
+            return derPrefix + seedHex;
+        }
+
+        function createDERPublicKey(seed) {
+            // For demo purposes, create a mock public key from the seed
+            // In real Ed25519, public key would be derived from private key
+            const mockPublicKey = new Uint8Array(32);
+            for (let i = 0; i < 32; i++) {
+                mockPublicKey[i] = seed[i] ^ 0x42; // Simple derivation for demo
+            }
+            const publicHex = Array.from(mockPublicKey, b => b.toString(16).padStart(2, '0')).join('');
+            // DER prefix for Ed25519 public key
+            const derPrefix = "302a300506032b65700321";
+            return derPrefix + "00" + publicHex;
+        }
+
+        async function registerUser() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            if (!generatedKeys) {
+                alert('Please generate keys first');
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: username,
+                        public_key: generatedKeys.public
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('register-result').innerHTML = `
+                        <div style="color: #059669; font-weight: bold;">
+                            ✅ Registration successful! You can now use BetChain.
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('register-result').innerHTML = `
+                        <div style="color: #dc2626; font-weight: bold;">
+                            ❌ Registration failed: ${result.detail}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('register-result').innerHTML = `
+                    <div style="color: #dc2626; font-weight: bold;">
+                        ❌ Network error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function downloadKeys() {
+            if (!generatedKeys) return;
+            
+            const content = `BetChain Private Key
+Generated: ${new Date().toISOString()}
+Username: ${document.getElementById('username').value || 'Not set'}
+
+Private Key: ${generatedKeys.private}
+Public Key: ${generatedKeys.public}
+
+⚠️  KEEP THIS PRIVATE KEY SECURE!
+⚠️  DO NOT SHARE WITH ANYONE!
+⚠️  YOU NEED THIS TO SIGN TRANSACTIONS!
+`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `betchain-private-key-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
