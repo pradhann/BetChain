@@ -24,68 +24,38 @@ def generate_key_pair() -> Tuple[str, str]:
     return private_bytes.hex(), public_bytes.hex()
 
 
-# User registry - stores public keys for known users
-# In production, this could be a database or external identity provider
-import json
-import os
-
-# Use persistent volume on Railway, fallback to local for development  
-DATA_DIR = "/app/data" if os.path.exists("/app/data") else "app/store"
-USER_REGISTRY_FILE = f"{DATA_DIR}/users.json"
-
-def load_user_registry():
-    """Load user registry from file."""
-    if os.path.exists(USER_REGISTRY_FILE):
-        try:
-            with open(USER_REGISTRY_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
-
-def save_user_registry(registry):
-    """Save user registry to file."""
-    os.makedirs(os.path.dirname(USER_REGISTRY_FILE), exist_ok=True)
-    with open(USER_REGISTRY_FILE, 'w') as f:
-        json.dump(registry, f, indent=2)
-
-# Load existing users
-USER_REGISTRY = load_user_registry()
-
+# User registry now uses PostgreSQL database
+try:
+    from .database import register_user_db, get_user_public_key_db, is_user_registered_db, get_all_users_db
+except ImportError:
+    from database import register_user_db, get_user_public_key_db, is_user_registered_db, get_all_users_db
 
 def register_user(username: str, public_key: str) -> bool:
     """Register a new user with their public key."""
-    global USER_REGISTRY
-    
-    if username in USER_REGISTRY:
-        return False  # User already exists
-    
-    # For demo purposes, accept any reasonable hex string as a public key
+    # Basic validation - should be hex and reasonable length
     try:
-        # Basic validation - should be hex and reasonable length
         if len(public_key) < 60:  # Should be a decent length hex string
             return False
         bytes.fromhex(public_key)  # Validate it's valid hex
         
-        USER_REGISTRY[username] = public_key
-        save_user_registry(USER_REGISTRY)  # Persist to file
-        print(f"DEBUG: Registered user {username} with key {public_key[:20]}...")
-        return True
+        result = register_user_db(username, public_key)
+        if result:
+            print(f"DEBUG: Registered user {username} with key {public_key[:20]}...")
+        return result
     except Exception as e:
         print(f"DEBUG: Registration failed for {username}: {e}")
         return False
 
-
 def get_user_public_key(username: str) -> str:
     """Get the public key for a registered user."""
-    if username not in USER_REGISTRY:
+    public_key = get_user_public_key_db(username)
+    if not public_key:
         raise ValueError(f"User '{username}' not registered")
-    return USER_REGISTRY[username]
-
+    return public_key
 
 def is_user_registered(username: str) -> bool:
     """Check if a user is registered."""
-    return username in USER_REGISTRY
+    return is_user_registered_db(username)
 
 
 def sign_transaction(private_key_hex: str, transaction_data: dict) -> str:

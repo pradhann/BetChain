@@ -199,8 +199,13 @@ async def register_user_endpoint(request: dict):
 @app.get("/users")
 async def get_registered_users():
     """Get list of all registered users."""
-    from .crypto import USER_REGISTRY
-    return {"users": list(USER_REGISTRY.keys())}
+    try:
+        from .database import get_all_users_db
+        users = get_all_users_db()
+    except ImportError:
+        from database import get_all_users_db
+        users = get_all_users_db()
+    return {"users": users}
 
 
 @app.get("/keys/{username}")

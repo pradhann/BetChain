@@ -1,25 +1,17 @@
-import os
 import json
 import hashlib
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
-from filelock import FileLock
 import orjson
+
 try:
     from .models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, VerifyResponse
     from .crypto import verify_signature, verify_user_ownership, is_user_registered
+    from .database import load_chain_db, append_entry_db, get_chain_head_db
 except ImportError:
     from models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, VerifyResponse
     from crypto import verify_signature, verify_user_ownership, is_user_registered
-
-
-import os
-
-# Use persistent volume on Railway, fallback to local for development
-DATA_DIR = "/app/data" if os.path.exists("/app/data") else "app/store"
-CHAIN_FILE = f"{DATA_DIR}/chain.jsonl"
-LOCK_FILE = f"{DATA_DIR}/chain.jsonl.lock"
-# No longer need a fixed friends list - anyone can join
+    from database import load_chain_db, append_entry_db, get_chain_head_db
 
 
 def canonical_json(obj: dict) -> bytes:
@@ -34,40 +26,40 @@ def compute_hash(entry_without_hash: dict) -> str:
 
 
 def load_chain() -> List[ChainEntry]:
-    """Load the entire chain from file."""
-    if not os.path.exists(CHAIN_FILE):
-        os.makedirs(os.path.dirname(CHAIN_FILE), exist_ok=True)
+    """Load the entire chain from database."""
+    try:
+        entries_data = load_chain_db()
+        return [ChainEntry(**entry_dict) for entry_dict in entries_data]
+    except Exception as e:
+        print(f"Error loading chain: {e}")
         return []
-    
-    entries = []
-    with open(CHAIN_FILE, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                entry_dict = json.loads(line)
-                entries.append(ChainEntry(**entry_dict))
-    return entries
 
 
 def get_head() -> Optional[HeadInfo]:
     """Get the current head of the chain."""
-    entries = load_chain()
-    if not entries:
+    try:
+        head_data = get_chain_head_db()
+        if not head_data:
+            return None
+        return HeadInfo(index=head_data["index"], hash=head_data["hash"])
+    except Exception as e:
+        print(f"Error getting chain head: {e}")
         return None
-    last_entry = entries[-1]
-    return HeadInfo(index=last_entry.index, hash=last_entry.hash)
 
 
 def append_entry(entry: ChainEntry) -> None:
-    """Append a new entry to the chain with file locking."""
-    with FileLock(LOCK_FILE):
-        with open(CHAIN_FILE, 'a') as f:
-            # Try model_dump() first (Pydantic v2), fall back to dict() (Pydantic v1)
-            try:
-                entry_dict = entry.model_dump()
-            except AttributeError:
-                entry_dict = entry.dict()
-            f.write(json.dumps(entry_dict) + '\n')
+    """Append a new entry to the chain database."""
+    try:
+        # Try model_dump() first (Pydantic v2), fall back to dict() (Pydantic v1)
+        try:
+            entry_dict = entry.model_dump()
+        except AttributeError:
+            entry_dict = entry.dict()
+        
+        append_entry_db(entry_dict)
+    except Exception as e:
+        print(f"Error appending entry: {e}")
+        raise
 
 
 def derive_bet_states(entries: List[ChainEntry]) -> Dict[str, BetState]:
