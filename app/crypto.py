@@ -80,13 +80,13 @@ def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: 
         signature_bytes = bytes.fromhex(signature_hex)
         public_key_bytes = bytes.fromhex(public_key_hex)
         
-        # Create canonical JSON for verification (same as client)
-        canonical_json = json.dumps(transaction_data, sort_keys=True, separators=(',', ':'))
-        message_bytes = canonical_json.encode('utf-8')
+        # Create canonical JSON for verification (must match client exactly)
+        # Client uses: JSON.stringify(transactionData, Object.keys(transactionData).sort())
+        canonical_data = orjson.dumps(transaction_data, option=orjson.OPT_SORT_KEYS)
         
         # Only accept real Ed25519 signatures - no fallback
         public_key = serialization.load_der_public_key(public_key_bytes)
-        public_key.verify(signature_bytes, message_bytes)
+        public_key.verify(signature_bytes, canonical_data)
         return True
         
     except Exception as e:
