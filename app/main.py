@@ -14,7 +14,7 @@ try:
         load_chain, derive_bet_states, validate_action, create_entry, 
         append_entry, get_head, verify_chain
     )
-    from .crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair
+    from .crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair, sign_transaction, verify_signature
 except ImportError:
     # Fallback to absolute imports (for direct execution)
     from models import (
@@ -26,7 +26,7 @@ except ImportError:
         load_chain, derive_bet_states, validate_action, create_entry, 
         append_entry, get_head, verify_chain
     )
-    from crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair
+    from crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair, sign_transaction, verify_signature
 
 app = FastAPI(title="BetChain", description="Hash-chained betting between friends")
 
@@ -233,6 +233,35 @@ async def generate_keys_endpoint():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Key generation failed: {str(e)}")
+
+
+@app.post("/validate-key")
+async def validate_key_endpoint(request: dict):
+    """Validate that a private key corresponds to a public key by testing Ed25519 signing."""
+    try:
+        private_key_hex = request.get("private_key")
+        public_key_hex = request.get("public_key")
+        
+        if not private_key_hex or not public_key_hex:
+            return {"valid": False, "error": "Missing private_key or public_key"}
+        
+        # Test signing with private key and verifying with public key
+        test_data = {"test": "key_validation", "timestamp": "2024-01-01T00:00:00Z"}
+        
+        try:
+            # Sign test data with private key
+            signature = sign_transaction(private_key_hex, test_data)
+            
+            # Verify signature with public key
+            valid = verify_signature(public_key_hex, signature, test_data)
+            
+            return {"valid": valid}
+            
+        except Exception as crypto_error:
+            return {"valid": False, "error": f"Cryptographic validation failed: {str(crypto_error)}"}
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Key validation failed: {str(e)}")
 
 
 if __name__ == "__main__":

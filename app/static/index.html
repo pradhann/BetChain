@@ -767,26 +767,18 @@
             }
         }
 
-        // Private key validation
-        function validatePrivateKeyForUser(privateKeyHex, publicKeyHex) {
-            // Basic format validation
-            if (!privateKeyHex || privateKeyHex.length < 60) {
+        // Validate private key by testing Ed25519 signing with server
+        async function validatePrivateKeyForUser(privateKeyHex, publicKeyHex) {
+            try {
+                const response = await apiCall('/validate-key', 'POST', {
+                    private_key: privateKeyHex,
+                    public_key: publicKeyHex
+                });
+                return response.valid;
+            } catch (error) {
+                console.error('Key validation failed:', error);
                 return false;
             }
-            
-            // Ensure it's not the same as the public key (prevent using public key as private key)
-            if (privateKeyHex === publicKeyHex) {
-                return false;
-            }
-            
-            // Private keys should start with DER prefix for Ed25519 private keys
-            if (!privateKeyHex.startsWith('302e020100300506032b657004220420')) {
-                return false;
-            }
-            
-            // With real Ed25519, we'll validate cryptographically when signing
-            // For now, basic format validation is sufficient
-            return true;
         }
         
 
@@ -805,8 +797,8 @@
                 const serverData = await apiCall(`/keys/${username}`);
                 
                 // Validate that the entered private key corresponds to the registered public key
-                // For our demo system, we'll check if the private key matches the expected format
-                if (!validatePrivateKeyForUser(privateKey, serverData.public_key)) {
+                const keyValid = await validatePrivateKeyForUser(privateKey, serverData.public_key);
+                if (!keyValid) {
                     throw new Error('Invalid private key for this user');
                 }
                 
