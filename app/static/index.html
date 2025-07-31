@@ -1092,10 +1092,27 @@
             }
         }
 
+        // Create canonical JSON that matches server's orjson.dumps(option=orjson.OPT_SORT_KEYS)
+        function createCanonicalJson(obj) {
+            if (obj === null || typeof obj !== 'object') {
+                return obj;
+            }
+            if (Array.isArray(obj)) {
+                return obj.map(createCanonicalJson);
+            }
+            const sorted = {};
+            Object.keys(obj).sort().forEach(key => {
+                sorted[key] = createCanonicalJson(obj[key]);
+            });
+            return sorted;
+        }
+
         // Real Ed25519 signature implementation
         async function signTransaction(transactionData) {
             try {
-                const canonicalJson = JSON.stringify(transactionData, Object.keys(transactionData).sort());
+                // Create canonical JSON that matches server's orjson.dumps(option=orjson.OPT_SORT_KEYS)
+                const canonicalData = createCanonicalJson(transactionData);
+                const canonicalJson = JSON.stringify(canonicalData);
                 const messageBytes = new TextEncoder().encode(canonicalJson);
                 
                 // Import the private key from hex
