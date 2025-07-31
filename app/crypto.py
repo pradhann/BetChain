@@ -88,20 +88,13 @@ def verify_signature(public_key_hex: str, signature_hex: str, transaction_data: 
         canonical_json = json.dumps(transaction_data, sort_keys=True, separators=(',', ':'))
         message_bytes = canonical_json.encode('utf-8')
         
-        try:
-            # Try Ed25519 verification first
-            public_key = serialization.load_der_public_key(public_key_bytes)
-            public_key.verify(signature_bytes, message_bytes)
-            return True
-            
-        except Exception:
-            # Fallback: Accept HMAC signatures (32 bytes) and raw Ed25519 (64 bytes)
-            if len(signature_bytes) in [32, 64]:
-                return True
+        # Only accept real Ed25519 signatures - no fallback
+        public_key = serialization.load_der_public_key(public_key_bytes)
+        public_key.verify(signature_bytes, message_bytes)
+        return True
         
-        return False
-        
-    except Exception:
+    except Exception as e:
+        print(f"Signature verification failed: {e}")
         return False
 
 

@@ -14,7 +14,7 @@ try:
         load_chain, derive_bet_states, validate_action, create_entry, 
         append_entry, get_head, verify_chain
     )
-    from .crypto import get_user_public_key, register_user, is_user_registered
+    from .crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair
 except ImportError:
     # Fallback to absolute imports (for direct execution)
     from models import (
@@ -26,7 +26,7 @@ except ImportError:
         load_chain, derive_bet_states, validate_action, create_entry, 
         append_entry, get_head, verify_chain
     )
-    from crypto import get_user_public_key, register_user, is_user_registered
+    from crypto import get_user_public_key, register_user, is_user_registered, generate_key_pair
 
 app = FastAPI(title="BetChain", description="Hash-chained betting between friends")
 
@@ -218,6 +218,21 @@ async def get_user_key(username: str):
     except ValueError as e:
         print(f"DEBUG: User {username} not found: {e}")
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/generate-keys")
+async def generate_keys_endpoint():
+    """Generate a new Ed25519 key pair using real cryptography."""
+    try:
+        private_key_hex, public_key_hex = generate_key_pair()
+        return {
+            "private_key": private_key_hex,
+            "public_key": public_key_hex,
+            "algorithm": "Ed25519",
+            "format": "DER"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Key generation failed: {str(e)}")
 
 
 if __name__ == "__main__":

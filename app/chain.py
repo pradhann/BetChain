@@ -285,7 +285,7 @@ def verify_chain() -> VerifyResponse:
         
         # Check business logic validation
         current_states = derive_bet_states(entries[:i])
-        valid, error = validate_action(entry.type, entry.bet_id, entry.author, entry.payload, current_states)
+        valid, error = validate_action(entry.type, entry.bet_id, entry.author, entry.payload, current_states, entry.public_key, entry.signature)
         if not valid:
             return VerifyResponse(ok=False, error_at_index=i, message=error)
     

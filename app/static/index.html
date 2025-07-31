@@ -784,25 +784,11 @@
                 return false;
             }
             
-            // For our demo system, derive expected public key from private key
-            // This is a simplified check - in real Ed25519, you'd do proper key derivation
-            const expectedPublicKey = derivePublicKeyFromPrivate(privateKeyHex);
-            return expectedPublicKey === publicKeyHex;
+            // With real Ed25519, we'll validate cryptographically when signing
+            // For now, basic format validation is sufficient
+            return true;
         }
         
-        function derivePublicKeyFromPrivate(privateKeyHex) {
-            // Extract the seed from the private key (last 64 chars = 32 bytes)
-            const seedHex = privateKeyHex.slice(-64);
-            
-            // Mock derivation - create public key using same method as key generator
-            const seed = new Uint8Array(seedHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-            const mockPublicKey = new Uint8Array(32);
-            for (let i = 0; i < 32; i++) {
-                mockPublicKey[i] = seed[i] ^ 0x42; // Same XOR operation as in key generator
-            }
-            const publicHex = Array.from(mockPublicKey, b => b.toString(16).padStart(2, '0')).join('');
-            return "302a300506032b65700321" + "00" + publicHex;
-        }
 
         // Authentication
         async function loginUser() {
@@ -1149,38 +1135,11 @@
                 };
                 
             } catch (error) {
-                console.error('Real signing failed, using fallback:', error);
-                // Fallback for browsers that don't support Ed25519
-                return await signTransactionFallback(transactionData);
+                console.error('Ed25519 signing failed:', error);
+                throw new Error('Ed25519 signing failed. Please ensure you have a valid private key and your browser supports Ed25519.');
             }
         }
         
-        // Fallback signing for browsers without Ed25519 support
-        async function signTransactionFallback(transactionData) {
-            const canonicalJson = JSON.stringify(transactionData, Object.keys(transactionData).sort());
-            
-            // Use HMAC-SHA256 as a fallback
-            const key = await crypto.subtle.importKey(
-                'raw',
-                hexToBytes(userKeys.private_key.slice(0, 64)), // Use first 32 bytes as key
-                { name: 'HMAC', hash: 'SHA-256' },
-                false,
-                ['sign']
-            );
-            
-            const signatureBytes = await crypto.subtle.sign(
-                'HMAC',
-                key,
-                new TextEncoder().encode(canonicalJson)
-            );
-            
-            const signatureHex = bytesToHex(new Uint8Array(signatureBytes));
-            
-            return {
-                signature: signatureHex,
-                public_key: userKeys.public_key
-            };
-        }
         
         // Utility functions
         function hexToBytes(hex) {

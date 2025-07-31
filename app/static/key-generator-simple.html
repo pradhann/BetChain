@@ -77,7 +77,7 @@
         <h1>🔐 BetChain Key Generator</h1>
         
         <div class="warning">
-            <strong>⚠️ SECURITY WARNING:</strong> Your private key will be generated locally in your browser. 
+            <strong>🔐 SECURITY INFO:</strong> Your private key will be generated using real Ed25519 cryptography on the server. 
             Copy and save it securely - it cannot be recovered if lost!
         </div>
 
@@ -108,15 +108,16 @@
         let generatedKeys = null;
 
         async function generateKeys() {
-            // Use the same DER format that the server expects (from the original crypto.py)
+            // Use real Ed25519 key generation from server API
             try {
-                // Generate 32 random bytes for private key seed
-                const privateKeySeed = crypto.getRandomValues(new Uint8Array(32));
+                const response = await fetch('/generate-keys');
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
                 
-                // Create DER-encoded keys to match server format
-                // This mimics the format from cryptography.hazmat.primitives
-                const privateKeyHex = createDERPrivateKey(privateKeySeed);
-                const publicKeyHex = createDERPublicKey(privateKeySeed);
+                const keys = await response.json();
+                const privateKeyHex = keys.private_key;
+                const publicKeyHex = keys.public_key;
                 
                 generatedKeys = {
                     private: privateKeyHex,
@@ -136,7 +137,7 @@
                         <button onclick="downloadKeys()">💾 Download Keys</button>
                     </div>
                     <div style="margin-top: 10px; color: #059669; font-size: 0.9em;">
-                        ✅ Keys generated in compatible format for BetChain
+                        ✅ Real Ed25519 keys generated securely by server
                     </div>
                 `;
             } catch (error) {
@@ -145,27 +146,6 @@
             }
         }
 
-        function createDERPrivateKey(seed) {
-            // Create a DER-encoded Ed25519 private key
-            // This is a simplified version that creates the same format as the Python library
-            const seedHex = Array.from(seed, b => b.toString(16).padStart(2, '0')).join('');
-            // DER prefix for Ed25519 private key
-            const derPrefix = "302e020100300506032b657004220420";
-            return derPrefix + seedHex;
-        }
-
-        function createDERPublicKey(seed) {
-            // For demo purposes, create a mock public key from the seed
-            // In real Ed25519, public key would be derived from private key
-            const mockPublicKey = new Uint8Array(32);
-            for (let i = 0; i < 32; i++) {
-                mockPublicKey[i] = seed[i] ^ 0x42; // Simple derivation for demo
-            }
-            const publicHex = Array.from(mockPublicKey, b => b.toString(16).padStart(2, '0')).join('');
-            // DER prefix for Ed25519 public key
-            const derPrefix = "302a300506032b65700321";
-            return derPrefix + "00" + publicHex;
-        }
 
         async function registerUser() {
             const username = document.getElementById('username').value.trim();
