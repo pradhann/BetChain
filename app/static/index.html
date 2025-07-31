@@ -305,6 +305,11 @@
             color: #fbbf24;
         }
 
+        .status-active {
+            background: #1e40af;
+            color: #60a5fa;
+        }
+
         .bet-stake {
             position: absolute;
             top: 15px;
@@ -911,11 +916,12 @@
                 const statusText = bet.status === 'OUTCOME_PENDING' ? 'pending' : bet.status.toLowerCase();
                 const isCompleted = bet.status === 'RESOLVED';
                 const isPending = bet.status === 'PROPOSED';
+                const isActive = bet.status === 'ACCEPTED' || bet.status === 'OUTCOME_PENDING';
                 const canAccept = bet.parties.counterparty === currentUser && bet.status === 'PROPOSED';
                 
                 return `
                     <div class="bet-card">
-                        <div class="bet-status status-${isCompleted ? 'completed' : 'pending'}">
+                        <div class="bet-status status-${isCompleted ? 'completed' : isPending ? 'pending' : 'active'}">
                             ${isCompleted ? '✅ Completed' : isPending ? '⏳ Pending' : '🎯 Active'}
                         </div>
                         
