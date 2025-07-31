@@ -265,6 +265,21 @@
             background: #4b5563;
         }
 
+        .action-btn {
+            background: #1e40af;
+            border: 1px solid #3b82f6;
+            color: #dbeafe;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        .action-btn:hover {
+            background: #1d4ed8;
+        }
+
         .loading {
             opacity: 0.6;
             pointer-events: none;
@@ -422,6 +437,7 @@
                                         <h4>Hash</h4>
                                         <p>${entry.hash.substring(0, 20)}... 
                                             <button class="copy-btn" onclick="copyToClipboard('${entry.hash}')">📋</button>
+                                            <button class="action-btn" onclick="getBlockHash(${index})">🔍 Get Hash</button>
                                         </p>
                                     </div>
                                     <div class="block-section">
@@ -434,6 +450,7 @@
                                         <h4>Signature</h4>
                                         <p>${entry.signature.substring(0, 20)}... 
                                             <button class="copy-btn" onclick="copyToClipboard('${entry.signature}')">📋</button>
+                                            <button class="action-btn" onclick="getBlockSignature(${index})">🔍 Get Signature</button>
                                         </p>
                                     </div>
                                 </div>
@@ -551,6 +568,90 @@
                 btn.textContent = '✓';
                 setTimeout(() => btn.textContent = original, 1000);
             });
+        }
+
+        async function getBlockHash(blockIndex) {
+            try {
+                // Get the full chain data
+                const response = await fetch('/chain');
+                const entries = await response.json();
+                
+                if (blockIndex >= entries.length) return;
+                
+                const entry = entries[blockIndex];
+                
+                // Create the data that goes into the hash (everything except the hash field)
+                const hashData = {
+                    index: entry.index,
+                    prev_hash: entry.prev_hash,
+                    timestamp: entry.timestamp,
+                    type: entry.type,
+                    bet_id: entry.bet_id,
+                    author: entry.author,
+                    payload: entry.payload,
+                    public_key: entry.public_key,
+                    signature: entry.signature
+                };
+                
+                // Populate the hash comparison tool
+                document.getElementById('hashData1').value = JSON.stringify(hashData, null, 2);
+                document.getElementById('hashData2').value = JSON.stringify(hashData, null, 2);
+                
+                // Generate hash to show expected result
+                const hashResponse = await fetch('/generate-hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: hashData })
+                });
+                
+                const hashResult = await hashResponse.json();
+                
+                // Show the result
+                document.getElementById('hash1Result').style.display = 'block';
+                document.getElementById('hash1Result').className = 'result-box success';
+                document.getElementById('hash1Result').innerHTML = `Expected: ${hashResult.hash}<br>Actual: ${entry.hash}<br>${hashResult.hash === entry.hash ? '✅ Match!' : '❌ Mismatch!'}`;
+                
+                // Scroll to tools
+                document.querySelector('.tools-grid').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert(`Error getting block hash: ${error.message}`);
+            }
+        }
+
+        async function getBlockSignature(blockIndex) {
+            try {
+                // Get the full chain data
+                const response = await fetch('/chain');
+                const entries = await response.json();
+                
+                if (blockIndex >= entries.length) return;
+                
+                const entry = entries[blockIndex];
+                
+                // Create the transaction data that was signed
+                const transactionData = {
+                    type: entry.type,
+                    bet_id: entry.bet_id,
+                    author: entry.author,
+                    payload: entry.payload,
+                    public_key: entry.public_key
+                };
+                
+                // Populate the signature check tool
+                document.getElementById('sigTransactionData').value = JSON.stringify(transactionData, null, 2);
+                document.getElementById('sigPublicKey').value = entry.public_key;
+                document.getElementById('sigSignature').value = entry.signature;
+                
+                // Auto-verify the signature
+                await checkSignature();
+                
+                // Scroll to tools
+                document.querySelector('.tools-grid').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert(`Error getting block signature: ${error.message}`);
+            }
         }
 
         // Load data on page load
