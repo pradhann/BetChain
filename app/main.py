@@ -17,7 +17,9 @@ from .crypto import get_user_public_key, register_user, is_user_registered
 app = FastAPI(title="BetChain", description="Hash-chained betting between friends")
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+import os
+static_dir = "static" if os.path.exists("static") else "app/static"
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 @app.post("/tx", response_model=ApiResponse)
@@ -138,7 +140,8 @@ async def verify_chain_integrity():
 async def get_ui():
     """Serve the main UI."""
     try:
-        with open("app/static/index.html", "r") as f:
+        index_path = "static/index.html" if os.path.exists("static/index.html") else "app/static/index.html"
+        with open(index_path, "r") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
         return HTMLResponse(content="""
