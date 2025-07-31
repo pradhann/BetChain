@@ -183,7 +183,6 @@ async def register_user_endpoint(request: dict):
         username = request.get("username")
         public_key = request.get("public_key")
         
-        print(f"DEBUG: Registration request - username: {username}, public_key: {public_key[:50]}...")
         
         if not username or not public_key:
             raise HTTPException(status_code=400, detail="Missing username or public_key")
@@ -213,10 +212,8 @@ async def get_user_key(username: str):
     """Get the public key for a registered user."""
     try:
         public_key = get_user_public_key(username)
-        print(f"DEBUG: Retrieved key for {username}: {public_key[:20]}...")
         return {"username": username, "public_key": public_key}
     except ValueError as e:
-        print(f"DEBUG: User {username} not found: {e}")
         raise HTTPException(status_code=404, detail=str(e))
 
 
@@ -262,6 +259,7 @@ async def validate_key_endpoint(request: dict):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Key validation failed: {str(e)}")
+
 
 
 if __name__ == "__main__":

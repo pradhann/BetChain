@@ -32,18 +32,14 @@ except ImportError:
 
 def register_user(username: str, public_key: str) -> bool:
     """Register a new user with their public key."""
-    # Basic validation - should be hex and reasonable length
     try:
-        if len(public_key) < 60:  # Should be a decent length hex string
-            return False
-        bytes.fromhex(public_key)  # Validate it's valid hex
+        # Validate it's a real Ed25519 public key by loading it
+        public_key_bytes = bytes.fromhex(public_key)
+        serialization.load_der_public_key(public_key_bytes)
         
         result = register_user_db(username, public_key)
-        if result:
-            print(f"DEBUG: Registered user {username} with key {public_key[:20]}...")
         return result
     except Exception as e:
-        print(f"DEBUG: Registration failed for {username}: {e}")
         return False
 
 def get_user_public_key(username: str) -> str:

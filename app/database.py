@@ -1,11 +1,9 @@
 import os
-import json
 from typing import List, Dict, Optional
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
 
 # Database setup
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:biUbUNcQTNAtQUsryHXhGgROJzcOGZfl@nozomi.proxy.rlwy.net:49835/railway")

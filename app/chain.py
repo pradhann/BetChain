@@ -141,7 +141,7 @@ def validate_action(action_type: ActionType, bet_id: str, author: str, payload: 
             "public_key": public_key
         }
         
-        # Verify signature
+        # Verify signature - no backwards compatibility, real Ed25519 only
         if not verify_signature(public_key, signature, transaction_data):
             return False, "Invalid signature"
     
