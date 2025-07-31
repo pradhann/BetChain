@@ -35,6 +35,18 @@
             font-size: 16px;
         }
         button:hover { background: #1d4ed8; }
+        .copy-btn {
+            background: #059669;
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .copy-btn:hover { background: #047857; }
+        .copy-success {
+            color: #059669;
+            font-size: 12px;
+            margin-left: 10px;
+        }
         .key-output {
             background: #1f2937;
             color: #10b981;
@@ -115,10 +127,13 @@
                     <h4>Your Keys Generated Successfully!</h4>
                     <div><strong>Public Key (to register):</strong></div>
                     <div class="key-output">${publicKeyHex}</div>
-                    <div><strong>Private Key (keep secret!):</strong></div>
+                    <div style="margin-top: 15px;"><strong>Private Key (keep secret!):</strong>
+                        <button class="copy-btn" onclick="copyPrivateKey()">📋 Copy Private Key</button>
+                        <span id="copy-feedback" class="copy-success" style="display: none;">✅ Copied!</span>
+                    </div>
                     <div class="key-output">${privateKeyHex}</div>
                     <div style="margin-top: 15px;">
-                        <button onclick="downloadKeys()">Download Keys</button>
+                        <button onclick="downloadKeys()">💾 Download Keys</button>
                     </div>
                     <div style="margin-top: 10px; color: #059669; font-size: 0.9em;">
                         ✅ Keys generated in compatible format for BetChain
@@ -194,6 +209,37 @@
                         ❌ Network error: ${error.message}
                     </div>
                 `;
+            }
+        }
+
+        async function copyPrivateKey() {
+            if (!generatedKeys) return;
+            
+            try {
+                await navigator.clipboard.writeText(generatedKeys.private);
+                
+                // Show success feedback
+                const feedback = document.getElementById('copy-feedback');
+                feedback.style.display = 'inline';
+                
+                // Hide feedback after 2 seconds
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+                
+            } catch (error) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedKeys.private;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('Private key copied to clipboard!');
+                } catch (err) {
+                    alert('Failed to copy. Please copy manually from the text box.');
+                }
+                document.body.removeChild(textArea);
             }
         }
 
