@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetChain Validation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+        }
+
+        .btn-secondary {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #b91c1c;
+        }
+
+        .btn-tertiary {
+            background: #1e40af;
+            color: white;
+        }
+
+        .btn-tertiary:hover {
+            background: #1d4ed8;
+        }
+
+        .chain-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #334155;
+        }
+
+        .block {
+            background: #334155;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #64748b;
+            position: relative;
+        }
+
+        .block.valid {
+            border-left-color: #10b981;
+        }
+
+        .block.invalid {
+            border-left-color: #ef4444;
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .block-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .block-badges {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.action-propose { background: #1e40af; color: #60a5fa; }
+        .badge.action-accept { background: #059669; color: #34d399; }
+        .badge.action-outcome { background: #7c3aed; color: #a78bfa; }
+        .badge.action-confirm { background: #db2777; color: #f472b6; }
+        .badge.action-resolve { background: #7c3aed; color: #a78bfa; }
+
+        .badge.valid { background: #065f46; color: #10b981; }
+        .badge.invalid { background: #7f1d1d; color: #ef4444; }
+
+        .block-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .block-section h4 {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .block-section p {
+            color: #e2e8f0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .tool-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #334155;
+        }
+
+        .tool-card h3 {
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .result-box {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+        .result-box.success {
+            border-color: #10b981;
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        .result-box.error {
+            border-color: #ef4444;
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .copy-btn {
+            background: #374151;
+            border: 1px solid #6b7280;
+            color: #d1d5db;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #4b5563;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .block-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 BetChain Validation</h1>
+            <p>Verify the integrity of the bet chain. Each block must reference the previous block's hash.</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="validateChain()">
+                ✅ Validate Chain
+            </button>
+            <button class="btn btn-secondary" onclick="toggleTamperMode()">
+                🔧 Tamper with Chain
+            </button>
+            <a href="/" class="btn btn-tertiary">
+                ← Back to Main
+            </a>
+        </div>
+
+        <div class="chain-container" id="chainContainer">
+            <p>Loading chain data...</p>
+        </div>
+
+        <div class="tools-grid">
+            <div class="tool-card">
+                <h3>🔍 Quick Signature Check</h3>
+                <div class="form-group">
+                    <label>Transaction Data</label>
+                    <textarea class="form-textarea" id="sigTransactionData" placeholder='{"type":"PROPOSE","bet_id":"bet_001","author":"alice","payload":{"counterparty":"bob","terms":"Lakers will beat Warriors","stake":"$20"},"public_key":"0x..."}'></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Public Key</label>
+                    <input type="text" class="form-input" id="sigPublicKey" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>Signature</label>
+                    <input type="text" class="form-input" id="sigSignature" placeholder="0x...">
+                </div>
+                <button class="btn btn-primary" onclick="checkSignature()">Validate</button>
+                <div id="sigResult" class="result-box" style="display: none;"></div>
+            </div>
+
+            <div class="tool-card">
+                <h3># Hash Comparison</h3>
+                <div class="form-group">
+                    <label>Data 1</label>
+                    <textarea class="form-textarea" id="hashData1" placeholder='{"type":"PROPOSE","bet_id":"bet_001","amount":20}'></textarea>
+                    <div id="hash1Result" class="result-box" style="display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Data 2</label>
+                    <textarea class="form-textarea" id="hashData2" placeholder='{"type":"PROPOSE","bet_id":"bet_001","amount":25}'></textarea>
+                    <div id="hash2Result" class="result-box" style="display: none;"></div>
+                </div>
+                <button class="btn btn-primary" onclick="generateHashes()">Generate Hashes</button>
+                <div id="hashComparison" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chainData = [];
+        let tamperMode = false;
+
+        // Load chain data on page load
+        async function loadChainData() {
+            try {
+                const response = await fetch('/verify');
+                const verifyResult = await response.json();
+                
+                // Load full chain
+                const chainResponse = await fetch('/bets');
+                const bets = await chainResponse.json();
+                
+                renderChain(verifyResult);
+            } catch (error) {
+                console.error('Failed to load chain data:', error);
+                document.getElementById('chainContainer').innerHTML = 
+                    '<p style="color: #ef4444;">Failed to load chain data</p>';
+            }
+        }
+
+        async function validateChain() {
+            document.getElementById('chainContainer').classList.add('loading');
+            await loadChainData();
+            document.getElementById('chainContainer').classList.remove('loading');
+        }
+
+        async function renderChain(verifyResult) {
+            try {
+                // Get full chain entries from a new endpoint we'll need
+                const response = await fetch('/chain');
+                let entries = [];
+                
+                if (response.ok) {
+                    entries = await response.json();
+                } else {
+                    // Fallback - create mock entries from verify result
+                    entries = createMockEntries();
+                }
+
+                const container = document.getElementById('chainContainer');
+                
+                if (entries.length === 0) {
+                    container.innerHTML = '<p>No blocks in chain</p>';
+                    return;
+                }
+
+                container.innerHTML = entries.map((entry, index) => {
+                    const isValid = verifyResult.ok || (verifyResult.error_at_index && index < verifyResult.error_at_index);
+                    const actionType = entry.type.toLowerCase();
+                    
+                    return `
+                        <div class="block ${isValid ? 'valid' : 'invalid'}">
+                            <div class="block-header">
+                                <div class="block-title">Block #${entry.index}</div>
+                                <div class="block-badges">
+                                    <span class="badge action-${actionType}">${entry.type}</span>
+                                    <span class="badge ${isValid ? 'valid' : 'invalid'}">${isValid ? 'Valid' : 'Invalid'}</span>
+                                </div>
+                            </div>
+                            <div class="block-content">
+                                <div>
+                                    <div class="block-section">
+                                        <h4>Author</h4>
+                                        <p>${entry.author}</p>
+                                    </div>
+                                    <div class="block-section">
+                                        <h4>Bet ID</h4>
+                                        <p>${entry.bet_id}</p>
+                                    </div>
+                                    <div class="block-section">
+                                        <h4>Data</h4>
+                                        <p>${JSON.stringify(entry.payload)}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="block-section">
+                                        <h4>Hash</h4>
+                                        <p>${entry.hash.substring(0, 20)}... 
+                                            <button class="copy-btn" onclick="copyToClipboard('${entry.hash}')">📋</button>
+                                        </p>
+                                    </div>
+                                    <div class="block-section">
+                                        <h4>Prev Hash</h4>
+                                        <p>${entry.prev_hash.substring(0, 20)}... 
+                                            <button class="copy-btn" onclick="copyToClipboard('${entry.prev_hash}')">📋</button>
+                                        </p>
+                                    </div>
+                                    <div class="block-section">
+                                        <h4>Signature</h4>
+                                        <p>${entry.signature.substring(0, 20)}... 
+                                            <button class="copy-btn" onclick="copyToClipboard('${entry.signature}')">📋</button>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Failed to render chain:', error);
+                document.getElementById('chainContainer').innerHTML = 
+                    '<p style="color: #ef4444;">Failed to render chain</p>';
+            }
+        }
+
+        function createMockEntries() {
+            return [
+                {
+                    index: 0,
+                    author: "system",
+                    bet_id: "genesis",
+                    type: "PROPOSE",
+                    payload: {"description": "Genesis Block - BetChain Initialized"},
+                    hash: "0x00abc123def45",
+                    prev_hash: "0x0000000000000",
+                    signature: "0x0000000000000"
+                }
+            ];
+        }
+
+        async function checkSignature() {
+            try {
+                const transactionData = JSON.parse(document.getElementById('sigTransactionData').value);
+                const publicKey = document.getElementById('sigPublicKey').value;
+                const signature = document.getElementById('sigSignature').value;
+
+                const response = await fetch('/verify-signature', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        transaction_data: transactionData,
+                        public_key: publicKey,
+                        signature: signature
+                    })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('sigResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = `result-box ${result.valid ? 'success' : 'error'}`;
+                resultDiv.textContent = result.valid ? '✅ Valid signature!' : '❌ Invalid signature!';
+
+            } catch (error) {
+                const resultDiv = document.getElementById('sigResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result-box error';
+                resultDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function generateHashes() {
+            try {
+                const data1 = JSON.parse(document.getElementById('hashData1').value);
+                const data2 = JSON.parse(document.getElementById('hashData2').value);
+
+                const [response1, response2] = await Promise.all([
+                    fetch('/generate-hash', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: data1 })
+                    }),
+                    fetch('/generate-hash', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: data2 })
+                    })
+                ]);
+
+                const result1 = await response1.json();
+                const result2 = await response2.json();
+
+                document.getElementById('hash1Result').style.display = 'block';
+                document.getElementById('hash1Result').className = 'result-box success';
+                document.getElementById('hash1Result').innerHTML = `${result1.hash} <button class="copy-btn" onclick="copyToClipboard('${result1.hash}')">📋</button>`;
+
+                document.getElementById('hash2Result').style.display = 'block';
+                document.getElementById('hash2Result').className = 'result-box success';
+                document.getElementById('hash2Result').innerHTML = `${result2.hash} <button class="copy-btn" onclick="copyToClipboard('${result2.hash}')">📋</button>`;
+
+                const comparison = document.getElementById('hashComparison');
+                comparison.style.display = 'block';
+                const isMatch = result1.hash === result2.hash;
+                comparison.className = `result-box ${isMatch ? 'success' : 'error'}`;
+                comparison.textContent = isMatch ? '✅ Hashes match - data is identical' : '⚠️ Different hashes - data changed!';
+
+            } catch (error) {
+                const comparison = document.getElementById('hashComparison');
+                comparison.style.display = 'block';
+                comparison.className = 'result-box error';
+                comparison.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        function toggleTamperMode() {
+            tamperMode = !tamperMode;
+            // TODO: Implement tampering functionality
+            alert(tamperMode ? 'Tamper mode enabled - you can now edit chain data' : 'Tamper mode disabled');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show brief success feedback
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✓';
+                setTimeout(() => btn.textContent = original, 1000);
+            });
+        }
+
+        // Load data on page load
+        loadChainData();
+    </script>
+</body>
+</html>

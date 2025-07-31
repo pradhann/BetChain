@@ -150,6 +150,25 @@ async def verify_chain_integrity():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/chain")
+async def get_full_chain():
+    """Get the full chain with all entries."""
+    try:
+        entries = load_chain()
+        # Convert ChainEntry objects to dictionaries for JSON serialization
+        result = []
+        for entry in entries:
+            try:
+                entry_dict = entry.model_dump()
+            except AttributeError:
+                entry_dict = entry.dict()
+            result.append(entry_dict)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/", response_class=HTMLResponse)
 async def get_ui():
     """Serve the main UI."""
@@ -259,6 +278,62 @@ async def validate_key_endpoint(request: dict):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Key validation failed: {str(e)}")
+
+
+@app.post("/generate-signature")
+async def generate_signature_endpoint(request: dict):
+    """Generate signature for given transaction data using provided private key."""
+    try:
+        private_key_hex = request.get("private_key")
+        transaction_data = request.get("transaction_data")
+        
+        if not private_key_hex or not transaction_data:
+            raise HTTPException(status_code=400, detail="Missing private_key or transaction_data")
+        
+        signature = sign_transaction(private_key_hex, transaction_data)
+        return {"signature": signature}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Signature generation failed: {str(e)}")
+
+
+@app.post("/verify-signature")
+async def verify_signature_endpoint(request: dict):
+    """Verify signature for given transaction data and public key."""
+    try:
+        public_key_hex = request.get("public_key")
+        signature_hex = request.get("signature")
+        transaction_data = request.get("transaction_data")
+        
+        if not public_key_hex or not signature_hex or not transaction_data:
+            raise HTTPException(status_code=400, detail="Missing public_key, signature, or transaction_data")
+        
+        valid = verify_signature(public_key_hex, signature_hex, transaction_data)
+        return {"valid": valid}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Signature verification failed: {str(e)}")
+
+
+@app.post("/generate-hash")
+async def generate_hash_endpoint(request: dict):
+    """Generate hash for given data using the same method as chain entries."""
+    try:
+        data = request.get("data")
+        
+        if data is None:
+            raise HTTPException(status_code=400, detail="Missing data")
+        
+        try:
+            from .chain import compute_hash
+        except ImportError:
+            from chain import compute_hash
+            
+        hash_value = compute_hash(data)
+        return {"hash": hash_value}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Hash generation failed: {str(e)}")
 
 
 

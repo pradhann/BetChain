@@ -660,9 +660,9 @@
                         </div>
                         <div class="chain-controls">
                             <div id="chainStatus" class="chain-status">✓ Verified</div>
-                            <button class="btn btn-secondary" onclick="validateChain()" id="validateBtn">
-                                🔍 Validate Chain
-                            </button>
+                            <a href="/static/validate.html" class="btn btn-secondary" id="validateBtn">
+                                🔗 Validate Chain
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1063,40 +1063,6 @@
             }
         }
         
-        // Validate chain manually
-        async function validateChain() {
-            const validateBtn = document.getElementById('validateBtn');
-            const chainStatus = document.getElementById('chainStatus');
-            
-            try {
-                // Show loading state
-                validateBtn.textContent = '⏳ Validating...';
-                validateBtn.disabled = true;
-                chainStatus.textContent = '🔍 Checking...';
-                chainStatus.className = 'chain-status';
-                
-                const verifyResponse = await apiCall('/verify');
-                
-                if (!verifyResponse.ok) {
-                    chainStatus.textContent = `⚠️ CORRUPTED (Index ${verifyResponse.error_at_index})`;
-                    chainStatus.className = 'chain-status corrupted';
-                    showNotification(`Chain corruption detected: ${verifyResponse.message} at index ${verifyResponse.error_at_index}`, 'error');
-                } else {
-                    chainStatus.textContent = '✓ Verified';
-                    chainStatus.className = 'chain-status';
-                    showNotification('✅ Chain integrity verified!', 'success');
-                }
-                
-            } catch (error) {
-                chainStatus.textContent = '❌ Check Failed';
-                chainStatus.className = 'chain-status corrupted';
-                showNotification('Failed to validate chain: ' + error.message, 'error');
-            } finally {
-                // Reset button
-                validateBtn.textContent = '🔍 Validate Chain';
-                validateBtn.disabled = false;
-            }
-        }
 
         // Create canonical JSON that matches server's orjson.dumps(option=orjson.OPT_SORT_KEYS)
         function createCanonicalJson(obj) {
