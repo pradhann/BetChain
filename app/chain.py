@@ -9,8 +9,12 @@ from .models import ChainEntry, BetState, BetStatus, ActionType, HeadInfo, Verif
 from .crypto import verify_signature, verify_user_ownership, is_user_registered
 
 
-CHAIN_FILE = "app/store/chain.jsonl"
-LOCK_FILE = "app/store/chain.jsonl.lock"
+import os
+
+# Use persistent volume on Railway, fallback to local for development
+DATA_DIR = "/app/data" if os.path.exists("/app/data") else "app/store"
+CHAIN_FILE = f"{DATA_DIR}/chain.jsonl"
+LOCK_FILE = f"{DATA_DIR}/chain.jsonl.lock"
 # No longer need a fixed friends list - anyone can join
 
 

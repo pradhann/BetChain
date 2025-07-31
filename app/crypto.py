@@ -29,7 +29,9 @@ def generate_key_pair() -> Tuple[str, str]:
 import json
 import os
 
-USER_REGISTRY_FILE = "app/store/users.json"
+# Use persistent volume on Railway, fallback to local for development  
+DATA_DIR = "/app/data" if os.path.exists("/app/data") else "app/store"
+USER_REGISTRY_FILE = f"{DATA_DIR}/users.json"
 
 def load_user_registry():
     """Load user registry from file."""
