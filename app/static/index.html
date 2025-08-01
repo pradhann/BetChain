@@ -563,6 +563,69 @@
             display: block;
         }
 
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .modal-header h3 {
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #374151;
+            color: #ffffff;
+        }
+
+        .modal-content {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
         /* User Profile Modal */
         .user-profile-modal {
             max-width: 450px;
@@ -1030,6 +1093,7 @@
         function closeUserProfile() {
             document.getElementById('userProfileOverlay').style.display = 'none';
             // Reset key visibility
+            keyVisible = false;
             document.getElementById('publicKeyHidden').style.display = 'inline';
             document.getElementById('publicKeyVisible').style.display = 'none';
             document.getElementById('toggleKeyBtn').textContent = '👁️ Show';
