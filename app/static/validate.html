@@ -708,7 +708,7 @@
                 const validationStatus = document.getElementById('validationStatus');
 
                 if (currentBlockHash) {
-                    // We're validating a specific block
+                    // Always show both hashes when we have a block reference
                     originalHashRow.style.display = 'flex'; 
                     document.getElementById('originalHashValue').textContent = currentBlockHash;
 
@@ -718,7 +718,7 @@
                         ? '✅ Hash Valid - Block data is authentic'
                         : '❌ Hash Invalid - Block data has been modified';
                 } else {
-                    // Just generating a hash for experimentation
+                    // Just generating a hash for experimentation (no block reference)
                     originalHashRow.style.display = 'none';
                     validationStatus.className = 'validation-status valid';
                     validationStatus.innerHTML = '🔍 Hash generated successfully. Modify the data above to see how it changes.';
@@ -744,15 +744,13 @@
             copyToClipboard(hashValue);
         }
 
-        // Clear the current block hash when user types manually
+        // Track when user manually edits data (but keep the block hash for comparison)
         document.addEventListener('DOMContentLoaded', function() {
             const hashDataTextarea = document.getElementById('hashData');
             if (hashDataTextarea) {
                 hashDataTextarea.addEventListener('input', function() {
-                    // If user is manually editing, clear the block hash reference
-                    if (this.value !== this.dataset.lastBlockData) {
-                        currentBlockHash = null;
-                    }
+                    // Don't clear currentBlockHash - keep it for comparison even when user edits
+                    // This allows us to always show both hashes for comparison
                 });
             }
         });
