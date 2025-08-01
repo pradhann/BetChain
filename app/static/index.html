@@ -930,32 +930,32 @@
                     <h3>👤 User Profile</h3>
                     <button class="modal-close" onclick="closeUserProfile()">✕</button>
                 </div>
-                
-                <div class="profile-section">
-                        <div class="profile-info">
-                            <div class="profile-avatar-large"></div>
-                            <div class="profile-details">
-                                <h4 id="profileUsername">Loading...</h4>
-                                <span class="profile-status">🔐 Verified Member</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="profile-section">
-                        <h5>🔑 Public Key</h5>
-                        <div class="key-display">
-                            <div class="key-field" id="publicKeyDisplay">
-                                <span class="key-hidden"
-                                    id="publicKeyHidden">••••••••••••••••••••••••••••••••••••••••</span>
-                                <span class="key-visible" id="publicKeyVisible" style="display: none;"></span>
-                            </div>
-                            <div class="key-actions">
-                                <button class="key-btn" onclick="togglePublicKeyVisibility()" id="toggleKeyBtn">👁️
-                                    Show</button>
-                                <button class="key-btn" onclick="copyPublicKey()" id="copyKeyBtn">📋 Copy</button>
-                            </div>
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <div class="profile-avatar-large"></div>
+                        <div class="profile-details">
+                            <h4 id="profileUsername">Loading...</h4>
+                            <span class="profile-status">🔐 Verified Member</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="profile-section">
+                    <h5>🔑 Public Key</h5>
+                    <div class="key-display">
+                        <div class="key-field" id="publicKeyDisplay">
+                            <span class="key-hidden"
+                                id="publicKeyHidden">••••••••••••••••••••••••••••••</span>
+                            <span class="key-visible" id="publicKeyVisible" style="display: none;"></span>
+                        </div>
+                        <div class="key-actions">
+                            <button class="key-btn" onclick="togglePublicKeyVisibility()" id="toggleKeyBtn">👁️
+                                Show</button>
+                            <button class="key-btn" onclick="copyPublicKey()" id="copyKeyBtn">📋 Copy</button>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="profile-section">
                     <button class="btn btn-secondary" onclick="logoutUser()" style="width: 100%;">
@@ -1091,17 +1091,17 @@
         // User profile functions
         function showUserProfile() {
             console.log('showUserProfile called', currentUser, userKeys);
-            
+
             // Update profile info
             document.getElementById('profileUsername').textContent = currentUser || 'Unknown';
             document.getElementById('publicKeyVisible').textContent = userKeys.public_key || 'No key found';
-            
+
             // Set avatar initial
             const avatarLarge = document.querySelector('.profile-avatar-large');
             if (avatarLarge) {
                 avatarLarge.textContent = currentUser ? currentUser[0].toUpperCase() : '?';
             }
-            
+
             // Show modal
             const overlay = document.getElementById('userProfileOverlay');
             if (overlay) {
