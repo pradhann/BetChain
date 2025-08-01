@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -245,7 +246,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .chain-title h2 {
             flex: 1;
         }
@@ -260,7 +261,7 @@
             align-items: center;
             gap: 12px;
         }
-        
+
         .chain-status {
             padding: 6px 12px;
             border-radius: 12px;
@@ -269,15 +270,22 @@
             background: #059669;
             color: white;
         }
-        
+
         .chain-status.corrupted {
             background: #dc2626;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         /* Bet Cards */
@@ -420,7 +428,9 @@
             color: #e5e7eb;
         }
 
-        .form-input, .form-select, .form-textarea {
+        .form-input,
+        .form-select,
+        .form-textarea {
             width: 100%;
             padding: 12px 16px;
             background: #374151;
@@ -430,7 +440,9 @@
             font-size: 0.875rem;
         }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
             outline: none;
             border-color: #10b981;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -670,12 +682,12 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .squad-members {
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+
             .bet-participants {
                 flex-direction: column;
                 align-items: flex-start;
@@ -688,6 +700,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="app">
         <!-- Login Section -->
@@ -697,24 +710,25 @@
                 <h1>BetChain</h1>
                 <div class="verification-badge">🔐 Verified Group</div>
             </div>
-            
-            <h2 style="margin-bottom: 10px;">Welcome to The BigSur Squad</h2>
-            <p style="color: #9ca3af; margin-bottom: 30px;">Cryptographically verified peer-to-peer betting between friends</p>
-            
+
+            <h2 style="margin-bottom: 10px;">Welcome to Chiya Pasal</h2>
+            <p style="color: #9ca3af; margin-bottom: 30px;">Cryptographically verified peer-to-peer betting between
+                friends</p>
+
             <div class="form-group">
                 <label class="form-label">Username</label>
                 <input type="text" id="loginUsername" class="form-input" placeholder="Enter your username">
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Private Key</label>
                 <input type="password" id="loginPrivateKey" class="form-input" placeholder="Enter your private key">
             </div>
-            
+
             <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="loginUser()">
                 🔐 Login Securely
             </button>
-            
+
             <p style="color: #9ca3af; font-size: 0.875rem;">
                 Need keys? <a href="/static/key-generator-simple.html" style="color: #10b981;">Generate them here →</a>
             </p>
@@ -729,7 +743,7 @@
                     <h1>BetChain</h1>
                     <div class="verification-badge">🔐 Verified Group</div>
                 </div>
-                
+
                 <div class="user-profile" onclick="showUserProfile()">
                     <div class="user-avatar"></div>
                     <span id="currentUserName">Alex Chen</span>
@@ -743,7 +757,7 @@
                     <h2 class="squad-title">The Squad</h2>
                 </div>
                 <div class="squad-subtitle">Cryptographically verified peer-to-peer betting between friends</div>
-                
+
                 <div class="squad-members" id="squadMembers">
                     <!-- Will be populated dynamically -->
                 </div>
@@ -761,13 +775,13 @@
                     <div class="stat-label">Your Active Bets</div>
                     <div class="stat-sublabel">Currently in play</div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-number" id="pendingChallenges">0</div>
                     <div class="stat-label">Pending Challenges</div>
                     <div class="stat-sublabel">Waiting for you</div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-number" id="totalBets">4</div>
                     <div class="stat-label">Total in Chain</div>
@@ -791,7 +805,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div id="betsList">
                     <!-- Will be populated with bet cards -->
                 </div>
@@ -802,12 +816,12 @@
         <div class="modal" id="proposeModal">
             <div class="modal-content">
                 <button class="close-btn" onclick="closeProposeModal()">&times;</button>
-                
+
                 <div class="modal-header">
                     <h2 class="modal-title">Propose New Bet</h2>
                     <p class="modal-subtitle">Challenge a friend to a cryptographically secured bet</p>
                 </div>
-                
+
                 <form id="proposeForm">
                     <div class="form-group">
                         <label class="form-label">Betting Against</label>
@@ -815,17 +829,20 @@
                             <option value="">Select opponent</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Bet Terms</label>
-                        <textarea id="proposeTerms" class="form-textarea" placeholder="Be specific about what you're betting on and the conditions for winning" required></textarea>
+                        <textarea id="proposeTerms" class="form-textarea"
+                            placeholder="Be specific about what you're betting on and the conditions for winning"
+                            required></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Stake</label>
-                        <input type="text" id="proposeStake" class="form-input" placeholder="What's on the line?" required>
+                        <input type="text" id="proposeStake" class="form-input" placeholder="What's on the line?"
+                            required>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary" style="width: 100%;">
                         🎯 Propose Bet
                     </button>
@@ -850,21 +867,23 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="profile-section">
                         <h5>🔑 Public Key</h5>
                         <div class="key-display">
                             <div class="key-field" id="publicKeyDisplay">
-                                <span class="key-hidden" id="publicKeyHidden">••••••••••••••••••••••••••••••••••••••••</span>
+                                <span class="key-hidden"
+                                    id="publicKeyHidden">••••••••••••••••••••••••••••••••••••••••</span>
                                 <span class="key-visible" id="publicKeyVisible" style="display: none;"></span>
                             </div>
                             <div class="key-actions">
-                                <button class="key-btn" onclick="togglePublicKeyVisibility()" id="toggleKeyBtn">👁️ Show</button>
+                                <button class="key-btn" onclick="togglePublicKeyVisibility()" id="toggleKeyBtn">👁️
+                                    Show</button>
                                 <button class="key-btn" onclick="copyPublicKey()" id="copyKeyBtn">📋 Copy</button>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="profile-section">
                         <button class="btn btn-secondary" onclick="logoutUser()" style="width: 100%;">
                             🚪 Logout
@@ -884,12 +903,12 @@
         let userKeys = {};
         let allUsers = [];
         let allBets = [];
-        
+
         // Load saved login state on page load
         function loadSavedLogin() {
             const savedUser = localStorage.getItem('betchain_user');
             const savedKeys = localStorage.getItem('betchain_keys');
-            
+
             if (savedUser && savedKeys) {
                 try {
                     currentUser = savedUser;
@@ -906,13 +925,13 @@
             }
             return false;
         }
-        
+
         // Save login state
         function saveLogin(username, keys) {
             localStorage.setItem('betchain_user', username);
             localStorage.setItem('betchain_keys', JSON.stringify(keys));
         }
-        
+
         // Clear saved login
         function clearSavedLogin() {
             localStorage.removeItem('betchain_user');
@@ -924,7 +943,7 @@
             try {
                 const response = await fetch(url, {
                     method,
-                    headers: body ? {'Content-Type': 'application/json'} : {},
+                    headers: body ? { 'Content-Type': 'application/json' } : {},
                     body: body ? JSON.stringify(body) : null
                 });
                 const data = await response.json();
@@ -951,47 +970,47 @@
                 return false;
             }
         }
-        
+
 
         // Authentication
         async function loginUser() {
             const username = document.getElementById('loginUsername').value.trim();
             const privateKey = document.getElementById('loginPrivateKey').value.trim();
-            
+
             if (!username || !privateKey) {
                 showNotification('Please enter both username and private key', 'error');
                 return;
             }
-            
+
             try {
                 // Verify user exists and get their registered public key
                 const serverData = await apiCall(`/keys/${username}`);
-                
+
                 // Validate that the entered private key corresponds to the registered public key
                 const keyValid = await validatePrivateKeyForUser(privateKey, serverData.public_key);
                 if (!keyValid) {
                     throw new Error('Invalid private key for this user');
                 }
-                
+
                 currentUser = username;
                 userKeys = {
                     private_key: privateKey,
                     public_key: serverData.public_key
                 };
-                
+
                 // Save login state
                 saveLogin(username, userKeys);
-                
+
                 // Switch to main app
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 document.getElementById('currentUserName').textContent = username;
-                
+
                 showNotification(`Welcome, ${username}! 🎉`);
-                
+
                 // Load data
                 await loadAllData();
-                
+
             } catch (error) {
                 showNotification('Login failed: ' + error.message, 'error');
             }
@@ -1002,7 +1021,7 @@
             document.getElementById('profileUsername').textContent = currentUser;
             document.getElementById('publicKeyVisible').textContent = userKeys.public_key || '';
             document.getElementById('userProfileOverlay').style.display = 'flex';
-            
+
             // Set avatar initial
             const avatarLarge = document.querySelector('.profile-avatar-large');
             avatarLarge.textContent = currentUser ? currentUser[0].toUpperCase() : '?';
@@ -1021,9 +1040,9 @@
             const hiddenSpan = document.getElementById('publicKeyHidden');
             const visibleSpan = document.getElementById('publicKeyVisible');
             const toggleBtn = document.getElementById('toggleKeyBtn');
-            
+
             keyVisible = !keyVisible;
-            
+
             if (keyVisible) {
                 hiddenSpan.style.display = 'none';
                 visibleSpan.style.display = 'inline';
@@ -1042,7 +1061,7 @@
                 const original = copyBtn.textContent;
                 copyBtn.textContent = '✅ Copied';
                 setTimeout(() => copyBtn.textContent = original, 2000);
-                
+
                 showNotification('Public key copied to clipboard', 'success');
             }).catch(err => {
                 showNotification('Failed to copy public key', 'error');
@@ -1067,11 +1086,11 @@
                 // Load users
                 const usersResponse = await apiCall('/users');
                 allUsers = usersResponse.users;
-                
+
                 // Load bets
                 const betsResponse = await apiCall('/bets');
                 allBets = betsResponse;
-                
+
                 // Verify chain integrity
                 const verifyResponse = await apiCall('/verify');
                 const chainStatus = document.getElementById('chainStatus');
@@ -1083,12 +1102,12 @@
                     chainStatus.textContent = '✓ Verified';
                     chainStatus.className = 'chain-status';
                 }
-                
+
                 renderSquadMembers();
                 renderStats();
                 renderBetsList();
                 updateProposeForm();
-                
+
             } catch (error) {
                 console.error('Failed to load data:', error);
             }
@@ -1108,14 +1127,14 @@
 
         // Render stats
         function renderStats() {
-            const userBets = allBets.filter(bet => 
+            const userBets = allBets.filter(bet =>
                 bet.parties.proposer === currentUser || bet.parties.counterparty === currentUser
             );
             const activeBets = userBets.filter(bet => bet.status === 'ACCEPTED').length;
-            const pendingChallenges = allBets.filter(bet => 
+            const pendingChallenges = allBets.filter(bet =>
                 bet.parties.counterparty === currentUser && bet.status === 'PROPOSED'
             ).length;
-            
+
             document.getElementById('activeBets').textContent = activeBets;
             document.getElementById('pendingChallenges').textContent = pendingChallenges;
             document.getElementById('totalBets').textContent = allBets.length;
@@ -1124,12 +1143,12 @@
         // Render bets list
         function renderBetsList() {
             const container = document.getElementById('betsList');
-            
+
             if (allBets.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 40px;">No bets yet. Be the first to propose one! 🎲</p>';
                 return;
             }
-            
+
             container.innerHTML = allBets.map((bet, index) => {
                 const statusClass = bet.status.toLowerCase().replace('_', '-');
                 const statusText = bet.status === 'OUTCOME_PENDING' ? 'pending' : bet.status.toLowerCase();
@@ -1137,7 +1156,7 @@
                 const isPending = bet.status === 'PROPOSED';
                 const isActive = bet.status === 'ACCEPTED' || bet.status === 'OUTCOME_PENDING';
                 const canAccept = bet.parties.counterparty === currentUser && bet.status === 'PROPOSED';
-                
+
                 return `
                     <div class="bet-card">
                         <div class="bet-status status-${isCompleted ? 'completed' : isPending ? 'pending' : 'active'}">
@@ -1201,28 +1220,28 @@
         function updateProposeForm() {
             const select = document.getElementById('proposeCounterparty');
             const otherUsers = allUsers.filter(user => user !== currentUser);
-            
-            select.innerHTML = '<option value="">Select opponent</option>' + 
+
+            select.innerHTML = '<option value="">Select opponent</option>' +
                 otherUsers.map(user => `<option value="${user}">${user}</option>`).join('');
         }
 
         // Form submission
         document.getElementById('proposeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const counterparty = document.getElementById('proposeCounterparty').value;
             const terms = document.getElementById('proposeTerms').value;
             const stake = document.getElementById('proposeStake').value;
-            
+
             if (!counterparty || !terms || !stake) {
                 showNotification('Please fill in all fields', 'error');
                 return;
             }
-            
+
             try {
                 // Generate bet ID
                 const betId = 'bet_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                
+
                 // Create transaction data
                 const transactionData = {
                     type: 'PROPOSE',
@@ -1236,21 +1255,21 @@
                     },
                     public_key: userKeys.public_key
                 };
-                
+
                 // Sign transaction
                 const signature = await signTransaction(transactionData);
-                
+
                 // Submit transaction
                 await apiCall('/tx', 'POST', {
                     ...transactionData,
                     signature: signature.signature
                 });
-                
+
                 showNotification('🎯 Bet proposed successfully!');
                 closeProposeModal();
                 e.target.reset();
                 await loadAllData();
-                
+
             } catch (error) {
                 showNotification('Failed to propose bet: ' + error.message, 'error');
             }
@@ -1266,22 +1285,22 @@
                     payload: {},
                     public_key: userKeys.public_key
                 };
-                
+
                 const signature = await signTransaction(transactionData);
-                
+
                 await apiCall('/tx', 'POST', {
                     ...transactionData,
                     signature: signature.signature
                 });
-                
+
                 showNotification('✅ Challenge accepted!');
                 await loadAllData();
-                
+
             } catch (error) {
                 showNotification('Failed to accept bet: ' + error.message, 'error');
             }
         }
-        
+
 
         // Create canonical JSON that matches server's orjson.dumps(option=orjson.OPT_SORT_KEYS)
         function createCanonicalJson(obj) {
@@ -1305,10 +1324,10 @@
                 const canonicalData = createCanonicalJson(transactionData);
                 const canonicalJson = JSON.stringify(canonicalData);
                 const messageBytes = new TextEncoder().encode(canonicalJson);
-                
+
                 // Import the private key from hex
                 const privateKeyBytes = hexToBytes(userKeys.private_key);
-                
+
                 // Import as Ed25519 private key
                 const privateKey = await crypto.subtle.importKey(
                     'pkcs8',
@@ -1319,28 +1338,28 @@
                     false,
                     ['sign']
                 );
-                
+
                 // Sign the message
                 const signatureBytes = await crypto.subtle.sign(
                     'Ed25519',
                     privateKey,
                     messageBytes
                 );
-                
+
                 const signatureHex = bytesToHex(new Uint8Array(signatureBytes));
-                
+
                 return {
                     signature: signatureHex,
                     public_key: userKeys.public_key
                 };
-                
+
             } catch (error) {
                 console.error('Ed25519 signing failed:', error);
                 throw new Error('Ed25519 signing failed. Please ensure you have a valid private key and your browser supports Ed25519.');
             }
         }
-        
-        
+
+
         // Utility functions
         function hexToBytes(hex) {
             const bytes = new Uint8Array(hex.length / 2);
@@ -1349,7 +1368,7 @@
             }
             return bytes;
         }
-        
+
         function bytesToHex(bytes) {
             return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
         }
@@ -1362,7 +1381,7 @@
             const diff = now - time;
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const days = Math.floor(hours / 24);
-            
+
             if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
             if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
             return 'just now';
@@ -1372,7 +1391,7 @@
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type} show`;
-            
+
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 4000);
@@ -1384,9 +1403,9 @@
                 closeProposeModal();
             }
         });
-        
+
         // Initialize app - check for saved login
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (!loadSavedLogin()) {
                 // No saved login, show login screen
                 document.getElementById('loginSection').style.display = 'block';
@@ -1398,4 +1417,5 @@
         });
     </script>
 </body>
+
 </html>
