@@ -353,6 +353,58 @@
             font-size: 0.9rem;
         }
 
+        .hash-comparison-display {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .hash-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+        .hash-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .hash-row .hash-label {
+            color: #94a3b8;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .hash-row .hash-value {
+            color: #e2e8f0;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .validation-status {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .validation-status.valid {
+            background: #064e3b;
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+
+        .validation-status.invalid {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
         @media (max-width: 768px) {
             .tools-grid {
                 grid-template-columns: 1fr;
@@ -404,38 +456,33 @@
             </div>
 
             <div class="tool-card">
-                <h3># Hash Comparison</h3>
-                <p style="color: #94a3b8; margin-bottom: 20px;">Compare hashes of two data sets to see how even small changes affect the output</p>
+                <h3># Hash Validation & Comparison</h3>
+                <p style="color: #94a3b8; margin-bottom: 20px;">Click "Validate Hash" on any block above to populate this tool, or enter your own data to experiment</p>
                 
-                <div class="hash-comparison-grid">
-                    <div class="hash-input-section">
-                        <label>Original Data</label>
-                        <textarea class="form-textarea" id="hashData1" placeholder='{"type":"PROPOSE","bet_id":"bet_001","amount":20}'></textarea>
-                        <div class="hash-output" id="hash1Output" style="display: none;">
-                            <span class="hash-label">Hash:</span>
-                            <span class="hash-value" id="hash1Value"></span>
-                            <button class="copy-btn" onclick="copyHashValue(1)">📋</button>
+                <div class="form-group">
+                    <label>Block Data (modify to see how hash changes)</label>
+                    <textarea class="form-textarea" id="hashData" placeholder='Click "Validate Hash" on a block above, or enter JSON data here'></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateAndCompareHash()" style="width: 100%; margin-bottom: 20px;">
+                    🔄 Generate Hash
+                </button>
+                
+                <div id="hashValidationResult" style="display: none;">
+                    <div class="hash-comparison-display">
+                        <div class="hash-row">
+                            <span class="hash-label">Generated Hash:</span>
+                            <span class="hash-value" id="generatedHashValue"></span>
+                            <button class="copy-btn" onclick="copyGeneratedHash()">📋</button>
+                        </div>
+                        <div class="hash-row" id="originalHashRow" style="display: none;">
+                            <span class="hash-label">Block's Hash:</span>
+                            <span class="hash-value" id="originalHashValue"></span>
+                            <button class="copy-btn" onclick="copyOriginalHash()">📋</button>
                         </div>
                     </div>
                     
-                    <div class="hash-input-section">
-                        <label>Modified Data</label>
-                        <textarea class="form-textarea" id="hashData2" placeholder='{"type":"PROPOSE","bet_id":"bet_001","amount":25}'></textarea>
-                        <div class="hash-output" id="hash2Output" style="display: none;">
-                            <span class="hash-label">Hash:</span>
-                            <span class="hash-value" id="hash2Value"></span>
-                            <button class="copy-btn" onclick="copyHashValue(2)">📋</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="generateHashes()" style="width: 100%; margin-top: 15px;">
-                    🔄 Generate & Compare Hashes
-                </button>
-                
-                <div id="hashComparisonResult" class="comparison-result" style="display: none;">
-                    <div class="comparison-status" id="comparisonStatus"></div>
-                    <div class="comparison-details" id="comparisonDetails"></div>
+                    <div class="validation-status" id="validationStatus"></div>
                 </div>
             </div>
         </div>
@@ -639,72 +686,76 @@
             }
         }
 
-        async function generateHashes() {
+        async function generateAndCompareHash() {
             try {
-                const data1 = JSON.parse(document.getElementById('hashData1').value);
-                const data2 = JSON.parse(document.getElementById('hashData2').value);
+                const data = JSON.parse(document.getElementById('hashData').value);
 
-                const [response1, response2] = await Promise.all([
-                    fetch('/generate-hash', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: data1 })
-                    }),
-                    fetch('/generate-hash', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: data2 })
-                    })
-                ]);
+                const response = await fetch('/generate-hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: data })
+                });
 
-                const result1 = await response1.json();
-                const result2 = await response2.json();
+                const result = await response.json();
+                const generatedHash = result.hash;
 
-                // Show individual hash outputs
-                document.getElementById('hash1Output').style.display = 'flex';
-                document.getElementById('hash1Value').textContent = result1.hash;
-                
-                document.getElementById('hash2Output').style.display = 'flex';
-                document.getElementById('hash2Value').textContent = result2.hash;
+                // Show the results
+                document.getElementById('hashValidationResult').style.display = 'block';
+                document.getElementById('generatedHashValue').textContent = generatedHash;
 
-                // Show comparison result
-                const comparison = document.getElementById('hashComparisonResult');
-                const status = document.getElementById('comparisonStatus');
-                const details = document.getElementById('comparisonDetails');
-                
-                comparison.style.display = 'block';
-                
-                const isMatch = result1.hash === result2.hash;
-                if (isMatch) {
-                    status.className = 'comparison-status match';
-                    status.innerHTML = '✅ Hashes Match';
-                    details.textContent = 'The data is identical - even the smallest change would produce a completely different hash.';
-                    comparison.style.background = '#064e3b';
-                    comparison.style.borderColor = '#10b981';
+                // Show comparison with original block hash if available
+                const originalHashRow = document.getElementById('originalHashRow');
+                const validationStatus = document.getElementById('validationStatus');
+
+                if (currentBlockHash) {
+                    // We're validating a specific block
+                    originalHashRow.style.display = 'flex'; 
+                    document.getElementById('originalHashValue').textContent = currentBlockHash;
+
+                    const isValid = generatedHash === currentBlockHash;
+                    validationStatus.className = `validation-status ${isValid ? 'valid' : 'invalid'}`;
+                    validationStatus.innerHTML = isValid 
+                        ? '✅ Hash Valid - Block data is authentic'
+                        : '❌ Hash Invalid - Block data has been modified';
                 } else {
-                    status.className = 'comparison-status different';
-                    status.innerHTML = '⚠️ Hashes Different';
-                    details.textContent = 'The data has been modified. This demonstrates how blockchain detects tampering - any change produces a different hash.';
-                    comparison.style.background = '#7f1d1d';
-                    comparison.style.borderColor = '#ef4444';
+                    // Just generating a hash for experimentation
+                    originalHashRow.style.display = 'none';
+                    validationStatus.className = 'validation-status valid';
+                    validationStatus.innerHTML = '🔍 Hash generated successfully. Modify the data above to see how it changes.';
                 }
 
             } catch (error) {
-                const comparison = document.getElementById('hashComparisonResult');
-                const status = document.getElementById('comparisonStatus');
-                comparison.style.display = 'block';
-                status.className = 'comparison-status different';
-                status.innerHTML = '❌ Error';
-                document.getElementById('comparisonDetails').textContent = `Failed to generate hashes: ${error.message}`;
-                comparison.style.background = '#7f1d1d';
-                comparison.style.borderColor = '#ef4444';
+                document.getElementById('hashValidationResult').style.display = 'block';
+                document.getElementById('generatedHashValue').textContent = 'Error generating hash';
+                
+                const validationStatus = document.getElementById('validationStatus');
+                validationStatus.className = 'validation-status invalid';
+                validationStatus.innerHTML = `❌ Error: ${error.message}`;
             }
         }
 
-        function copyHashValue(hashNumber) {
-            const hashValue = document.getElementById(`hash${hashNumber}Value`).textContent;
+        function copyGeneratedHash() {
+            const hashValue = document.getElementById('generatedHashValue').textContent;
             copyToClipboard(hashValue);
         }
+
+        function copyOriginalHash() {
+            const hashValue = document.getElementById('originalHashValue').textContent;
+            copyToClipboard(hashValue);
+        }
+
+        // Clear the current block hash when user types manually
+        document.addEventListener('DOMContentLoaded', function() {
+            const hashDataTextarea = document.getElementById('hashData');
+            if (hashDataTextarea) {
+                hashDataTextarea.addEventListener('input', function() {
+                    // If user is manually editing, clear the block hash reference
+                    if (this.value !== this.dataset.lastBlockData) {
+                        currentBlockHash = null;
+                    }
+                });
+            }
+        });
 
 
         function copyToClipboard(text) {
@@ -717,6 +768,8 @@
             });
         }
 
+        let currentBlockHash = null; // Store original block hash for comparison
+
         async function getBlockHash(blockIndex) {
             try {
                 // Get the full chain data
@@ -726,6 +779,9 @@
                 if (blockIndex >= entries.length) return;
                 
                 const entry = entries[blockIndex];
+                
+                // Store the original block hash for comparison
+                currentBlockHash = entry.hash;
                 
                 // Create the data that goes into the hash (everything except the hash field)
                 const hashData = {
@@ -740,23 +796,11 @@
                     signature: entry.signature
                 };
                 
-                // Populate the hash comparison tool
-                document.getElementById('hashData1').value = JSON.stringify(hashData, null, 2);
-                document.getElementById('hashData2').value = JSON.stringify(hashData, null, 2);
+                // Populate the hash tool
+                document.getElementById('hashData').value = JSON.stringify(hashData, null, 2);
                 
-                // Generate hash to show expected result
-                const hashResponse = await fetch('/generate-hash', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: hashData })
-                });
-                
-                const hashResult = await hashResponse.json();
-                
-                // Show the result
-                document.getElementById('hash1Result').style.display = 'block';
-                document.getElementById('hash1Result').className = 'result-box success';
-                document.getElementById('hash1Result').innerHTML = `Expected: ${hashResult.hash}<br>Actual: ${entry.hash}<br>${hashResult.hash === entry.hash ? '✅ Match!' : '❌ Mismatch!'}`;
+                // Generate and compare hash immediately
+                await generateAndCompareHash();
                 
                 // Scroll to tools
                 document.querySelector('.tools-grid').scrollIntoView({ behavior: 'smooth' });
