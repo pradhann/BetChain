@@ -624,12 +624,22 @@
             padding: 25px;
             max-height: 80vh;
             overflow-y: auto;
+            position: relative;
+            z-index: 1001;
         }
 
         /* User Profile Modal */
         .user-profile-modal {
             max-width: 450px;
             width: 90%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1001;
         }
 
         .profile-section {
@@ -817,7 +827,7 @@
             <div class="squad-section">
                 <div class="squad-header">
                     <span class="squad-icon">👥</span>
-                    <h2 class="squad-title">The Squad</h2>
+                    <h2 class="squad-title">Chiya Pasal</h2>
                 </div>
                 <div class="squad-subtitle">Cryptographically verified peer-to-peer betting between friends</div>
 
@@ -915,13 +925,13 @@
 
         <!-- User Profile Modal -->
         <div class="modal-overlay" id="userProfileOverlay" onclick="closeUserProfile()">
-            <div class="modal user-profile-modal" onclick="event.stopPropagation()">
+            <div class="user-profile-modal" onclick="event.stopPropagation()">
                 <div class="modal-header">
                     <h3>👤 User Profile</h3>
                     <button class="modal-close" onclick="closeUserProfile()">✕</button>
                 </div>
-                <div class="modal-content">
-                    <div class="profile-section">
+                
+                <div class="profile-section">
                         <div class="profile-info">
                             <div class="profile-avatar-large"></div>
                             <div class="profile-details">
@@ -947,11 +957,10 @@
                         </div>
                     </div>
 
-                    <div class="profile-section">
-                        <button class="btn btn-secondary" onclick="logoutUser()" style="width: 100%;">
-                            🚪 Logout
-                        </button>
-                    </div>
+                <div class="profile-section">
+                    <button class="btn btn-secondary" onclick="logoutUser()" style="width: 100%;">
+                        🚪 Logout
+                    </button>
                 </div>
             </div>
         </div>
@@ -1081,13 +1090,26 @@
 
         // User profile functions
         function showUserProfile() {
-            document.getElementById('profileUsername').textContent = currentUser;
-            document.getElementById('publicKeyVisible').textContent = userKeys.public_key || '';
-            document.getElementById('userProfileOverlay').style.display = 'flex';
-
+            console.log('showUserProfile called', currentUser, userKeys);
+            
+            // Update profile info
+            document.getElementById('profileUsername').textContent = currentUser || 'Unknown';
+            document.getElementById('publicKeyVisible').textContent = userKeys.public_key || 'No key found';
+            
             // Set avatar initial
             const avatarLarge = document.querySelector('.profile-avatar-large');
-            avatarLarge.textContent = currentUser ? currentUser[0].toUpperCase() : '?';
+            if (avatarLarge) {
+                avatarLarge.textContent = currentUser ? currentUser[0].toUpperCase() : '?';
+            }
+            
+            // Show modal
+            const overlay = document.getElementById('userProfileOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                console.log('Modal should be visible now');
+            } else {
+                console.error('Modal overlay not found');
+            }
         }
 
         function closeUserProfile() {
