@@ -551,6 +551,120 @@
             display: block;
         }
 
+        /* User Profile Modal */
+        .user-profile-modal {
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .profile-section {
+            margin-bottom: 25px;
+        }
+
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .profile-section h5 {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .profile-avatar-large {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .profile-details h4 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .profile-status {
+            color: #10b981;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .key-display {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .key-field {
+            background: #1e293b;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .key-hidden {
+            color: #64748b;
+            letter-spacing: 2px;
+        }
+
+        .key-visible {
+            color: #e2e8f0;
+        }
+
+        .key-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .key-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: #374151;
+            border: 1px solid #6b7280;
+            color: #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .key-btn:hover {
+            background: #4b5563;
+            border-color: #9ca3af;
+        }
+
+        .key-btn:active {
+            transform: translateY(1px);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .stats-grid {
@@ -565,6 +679,11 @@
             .bet-participants {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .user-profile-modal {
+                width: 95%;
+                max-width: none;
             }
         }
     </style>
@@ -611,7 +730,7 @@
                     <div class="verification-badge">🔐 Verified Group</div>
                 </div>
                 
-                <div class="user-profile" onclick="logoutUser()">
+                <div class="user-profile" onclick="showUserProfile()">
                     <div class="user-avatar"></div>
                     <span id="currentUserName">Alex Chen</span>
                 </div>
@@ -711,6 +830,47 @@
                         🎯 Propose Bet
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- User Profile Modal -->
+        <div class="modal-overlay" id="userProfileOverlay" onclick="closeUserProfile()">
+            <div class="modal user-profile-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>👤 User Profile</h3>
+                    <button class="modal-close" onclick="closeUserProfile()">✕</button>
+                </div>
+                <div class="modal-content">
+                    <div class="profile-section">
+                        <div class="profile-info">
+                            <div class="profile-avatar-large"></div>
+                            <div class="profile-details">
+                                <h4 id="profileUsername">Loading...</h4>
+                                <span class="profile-status">🔐 Verified Member</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h5>🔑 Public Key</h5>
+                        <div class="key-display">
+                            <div class="key-field" id="publicKeyDisplay">
+                                <span class="key-hidden" id="publicKeyHidden">••••••••••••••••••••••••••••••••••••••••</span>
+                                <span class="key-visible" id="publicKeyVisible" style="display: none;"></span>
+                            </div>
+                            <div class="key-actions">
+                                <button class="key-btn" onclick="togglePublicKeyVisibility()" id="toggleKeyBtn">👁️ Show</button>
+                                <button class="key-btn" onclick="copyPublicKey()" id="copyKeyBtn">📋 Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <button class="btn btn-secondary" onclick="logoutUser()" style="width: 100%;">
+                            🚪 Logout
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -837,7 +997,60 @@
             }
         }
 
+        // User profile functions
+        function showUserProfile() {
+            document.getElementById('profileUsername').textContent = currentUser;
+            document.getElementById('publicKeyVisible').textContent = userKeys.public_key || '';
+            document.getElementById('userProfileOverlay').style.display = 'flex';
+            
+            // Set avatar initial
+            const avatarLarge = document.querySelector('.profile-avatar-large');
+            avatarLarge.textContent = currentUser ? currentUser[0].toUpperCase() : '?';
+        }
+
+        function closeUserProfile() {
+            document.getElementById('userProfileOverlay').style.display = 'none';
+            // Reset key visibility
+            document.getElementById('publicKeyHidden').style.display = 'inline';
+            document.getElementById('publicKeyVisible').style.display = 'none';
+            document.getElementById('toggleKeyBtn').textContent = '👁️ Show';
+        }
+
+        let keyVisible = false;
+        function togglePublicKeyVisibility() {
+            const hiddenSpan = document.getElementById('publicKeyHidden');
+            const visibleSpan = document.getElementById('publicKeyVisible');
+            const toggleBtn = document.getElementById('toggleKeyBtn');
+            
+            keyVisible = !keyVisible;
+            
+            if (keyVisible) {
+                hiddenSpan.style.display = 'none';
+                visibleSpan.style.display = 'inline';
+                toggleBtn.textContent = '🙈 Hide';
+            } else {
+                hiddenSpan.style.display = 'inline';
+                visibleSpan.style.display = 'none';
+                toggleBtn.textContent = '👁️ Show';
+            }
+        }
+
+        function copyPublicKey() {
+            const publicKey = userKeys.public_key || '';
+            navigator.clipboard.writeText(publicKey).then(() => {
+                const copyBtn = document.getElementById('copyKeyBtn');
+                const original = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied';
+                setTimeout(() => copyBtn.textContent = original, 2000);
+                
+                showNotification('Public key copied to clipboard', 'success');
+            }).catch(err => {
+                showNotification('Failed to copy public key', 'error');
+            });
+        }
+
         function logoutUser() {
+            closeUserProfile(); // Close modal first
             currentUser = null;
             userKeys = {};
             clearSavedLogin();
