@@ -916,6 +916,11 @@
                             required>
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label">Deadline</label>
+                        <input type="datetime-local" id="proposeDeadline" class="form-input" required>
+                    </div>
+
                     <button type="submit" class="btn btn-primary" style="width: 100%;">
                         🎯 Propose Bet
                     </button>
@@ -1318,8 +1323,9 @@
             const counterparty = document.getElementById('proposeCounterparty').value;
             const terms = document.getElementById('proposeTerms').value;
             const stake = document.getElementById('proposeStake').value;
+            const deadline = document.getElementById('proposeDeadline').value;
 
-            if (!counterparty || !terms || !stake) {
+            if (!counterparty || !terms || !stake || !deadline) {
                 showNotification('Please fill in all fields', 'error');
                 return;
             }
@@ -1327,6 +1333,11 @@
             try {
                 // Generate bet ID
                 const betId = 'bet_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Convert deadline to UTC ISO string
+                const deadlineUtc = new Date(deadline).toISOString();
+                console.log('Raw deadline input:', deadline);
+                console.log('Converted deadline_utc:', deadlineUtc);
 
                 // Create transaction data
                 const transactionData = {
@@ -1337,10 +1348,12 @@
                         counterparty: counterparty,
                         terms: terms,
                         stake: stake,
-                        deadline_utc: null
+                        deadline_utc: deadlineUtc
                     },
                     public_key: userKeys.public_key
                 };
+                
+                console.log('Transaction data being sent:', transactionData);
 
                 // Sign transaction
                 const signature = await signTransaction(transactionData);
