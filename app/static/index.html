@@ -482,6 +482,51 @@
             background: #4b5563;
         }
 
+        .btn-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Loading skeleton */
+        .skeleton-bet-card {
+            background: #1a1d29;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            background: #374151;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        .skeleton-line.medium {
+            width: 80%;
+        }
+
+        .skeleton-circle {
+            width: 24px;
+            height: 24px;
+            background: #374151;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -922,8 +967,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Deadline</label>
-                        <input type="datetime-local" id="proposeDeadline" class="form-input" required>
+                        <label class="form-label">Deadline <span style="color: #9ca3af; font-weight: normal;">(optional)</span></label>
+                        <input type="datetime-local" id="proposeDeadline" class="form-input">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -1179,6 +1224,9 @@
         // Load all data
         async function loadAllData() {
             try {
+                // Show loading skeletons
+                showBetsLoading();
+                
                 // Load users
                 const usersResponse = await apiCall('/users');
                 allUsers = usersResponse.users;
@@ -1236,6 +1284,34 @@
             document.getElementById('totalBets').textContent = allBets.length;
         }
 
+        // Show loading skeleton for bets
+        function showBetsLoading() {
+            const container = document.getElementById('betsList');
+            container.innerHTML = Array.from({length: 3}, () => `
+                <div class="skeleton-bet-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                    <div class="skeleton-line medium" style="margin-bottom: 15px;"></div>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center;">
+                            <div class="skeleton-circle"></div>
+                            <div class="skeleton-line short" style="margin: 0; width: 60px;"></div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="skeleton-circle"></div>
+                            <div class="skeleton-line short" style="margin: 0; width: 60px;"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // Render bets list
         function renderBetsList() {
             const container = document.getElementById('betsList');
@@ -1252,7 +1328,8 @@
                 const isCompleted = bet.status === 'RESOLVED';
                 const isPending = bet.status === 'PROPOSED';
                 const isActive = bet.status === 'ACCEPTED' || bet.status === 'OUTCOME_PENDING';
-                const canAccept = bet.parties.counterparty === currentUser && bet.status === 'PROPOSED' && !isExpired;
+                const shouldShowAccept = bet.parties.counterparty === currentUser && bet.status === 'PROPOSED';
+                const canAccept = shouldShowAccept && !isExpired;
                 const deadlineInfo = formatDeadline(bet.deadline_utc);
 
                 return `
@@ -1278,16 +1355,16 @@
                                 </div>
                             </div>
                             
-                            ${canAccept ? `
-                                <button class="btn btn-primary" style="margin-top: 15px;" onclick="acceptBet('${bet.bet_id}')">
-                                    ✅ Accept Challenge
+                            ${shouldShowAccept ? `
+                                <button class="btn btn-primary ${!canAccept ? 'btn-disabled' : ''}" style="margin-top: 15px;" onclick="acceptBet('${bet.bet_id}')">
+                                    ${canAccept ? '✅ Accept Challenge' : '⏰ Expired - Cannot Accept'}
                                 </button>
                             ` : ''}
                             
                             <div class="bet-meta">
                                 <div class="bet-time">
-                                    <span>${getTimeAgo(bet.last_updated)}</span>
-                                    ${deadlineInfo ? `<span style="margin-left: 10px; color: ${isExpired ? '#fca5a5' : '#9ca3af'};">• ${deadlineInfo}</span>` : ''}
+                                    <span>${getTimeAgo(bet.last_updated, bet.status)}</span>
+                                    ${deadlineInfo ? `<span style="margin-left: 10px; color: ${getDeadlineColor(bet.deadline_utc)}; font-weight: 600;">• ${deadlineInfo}</span>` : ''}
                                 </div>
                                 <div class="bet-id">#${bet.bet_id.slice(0, 8)}</div>
                             </div>
@@ -1333,8 +1410,8 @@
             const stake = document.getElementById('proposeStake').value;
             const deadline = document.getElementById('proposeDeadline').value;
 
-            if (!counterparty || !terms || !stake || !deadline) {
-                showNotification('Please fill in all fields', 'error');
+            if (!counterparty || !terms || !stake) {
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
 
@@ -1342,8 +1419,8 @@
                 // Generate bet ID
                 const betId = 'bet_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 
-                // Convert deadline to UTC ISO string
-                const deadlineUtc = new Date(deadline).toISOString();
+                // Convert deadline to UTC ISO string (if provided)
+                const deadlineUtc = deadline ? new Date(deadline).toISOString() : null;
                 console.log('Raw deadline input:', deadline);
                 console.log('Converted deadline_utc:', deadlineUtc);
 
@@ -1488,18 +1565,58 @@
             return now > deadline;
         }
 
+        // Get deadline urgency color based on time remaining
+        function getDeadlineColor(deadlineUtc) {
+            if (!deadlineUtc) return '#9ca3af'; // Default gray
+            const deadline = new Date(deadlineUtc);
+            const now = new Date();
+            const diffMs = deadline - now;
+            
+            if (diffMs < 0) return '#fca5a5'; // Expired - light red
+            if (diffMs < 5 * 60 * 1000) return '#ef4444'; // <5 min - red
+            if (diffMs < 60 * 60 * 1000) return '#fb923c'; // <1 hour - orange
+            if (diffMs < 24 * 60 * 60 * 1000) return '#fbbf24'; // <24 hours - yellow
+            return '#10b981'; // >24 hours - green
+        }
+
         // Format deadline for display
         function formatDeadline(deadlineUtc) {
             if (!deadlineUtc) return null;
             const deadline = new Date(deadlineUtc);
             const now = new Date();
             const diffMs = deadline - now;
+            const diffMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60));
+            const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
             const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
             
-            if (diffDays < 0) {
-                return `Expired ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} ago`;
-            } else if (diffDays === 0) {
-                return 'Expires today';
+            if (diffMs < 0) {
+                // Expired
+                const absDiffMs = Math.abs(diffMs);
+                if (absDiffMs < 60 * 60 * 1000) { // Less than 1 hour ago
+                    const expiredMinutes = Math.floor(absDiffMs / (1000 * 60));
+                    if (expiredMinutes < 1) {
+                        return 'Just expired';
+                    } else {
+                        return `Expired ${expiredMinutes} min ago`;
+                    }
+                } else if (absDiffMs < 24 * 60 * 60 * 1000) { // Less than 24 hours ago
+                    const expiredHours = Math.floor(absDiffMs / (1000 * 60 * 60));
+                    return `Expired ${expiredHours} hour${expiredHours !== 1 ? 's' : ''} ago`;
+                } else {
+                    const expiredDays = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
+                    return `Expired ${expiredDays} day${expiredDays !== 1 ? 's' : ''} ago`;
+                }
+            } else if (diffMs < 60 * 1000) {
+                // Less than 1 minute - show seconds
+                const seconds = Math.floor(diffMs / 1000);
+                return `${seconds}s left`;
+            } else if (diffMs < 60 * 60 * 1000) {
+                // Less than 1 hour - show minutes
+                const minutes = Math.floor(diffMs / (1000 * 60));
+                return `${minutes} min left`;
+            } else if (diffHours <= 24) {
+                // Less than 24 hours - show hours
+                return `${diffHours} hour${diffHours !== 1 ? 's' : ''} left`;
             } else if (diffDays === 1) {
                 return 'Expires tomorrow';
             } else {
@@ -1508,17 +1625,24 @@
         }
 
         // Utility functions
-        function getTimeAgo(timestamp) {
+        function getTimeAgo(timestamp, betStatus = null) {
             if (!timestamp) return 'just now';
             const now = new Date();
             const time = new Date(timestamp);
             const diff = now - time;
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const days = Math.floor(hours / 24);
+            
+            // Add context based on bet status
+            const context = betStatus === 'PROPOSED' ? 'Proposed' : 
+                           betStatus === 'ACCEPTED' ? 'Started' :
+                           betStatus === 'RESOLVED' ? 'Resolved' : '';
 
-            if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-            if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-            return 'just now';
+            const timeStr = days > 0 ? `${days} day${days > 1 ? 's' : ''} ago` :
+                           hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ago` :
+                           'just now';
+
+            return context ? `${context} ${timeStr}` : timeStr;
         }
 
         function showNotification(message, type = 'success') {
@@ -1547,6 +1671,26 @@
             } else {
                 // Saved login loaded, load data
                 loadAllData();
+                
+                // Smart countdown updates - faster when close to deadline
+                setInterval(() => {
+                    if (allBets.length > 0) {
+                        renderBetsList();
+                    }
+                }, 60000); // Every 60 seconds for normal updates
+                
+                // Fast updates when any bet is within 1 hour of deadline
+                setInterval(() => {
+                    if (allBets.length > 0 && allBets.some(bet => {
+                        if (!bet.deadline_utc) return false;
+                        const deadline = new Date(bet.deadline_utc);
+                        const now = new Date();
+                        const diffMs = Math.abs(deadline - now);
+                        return diffMs <= 60 * 60 * 1000; // Within 1 hour
+                    })) {
+                        renderBetsList();
+                    }
+                }, 1000); // Every 1 second when close
             }
         });
     </script>
